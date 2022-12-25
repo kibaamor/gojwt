@@ -1,10 +1,14 @@
+//go:build test || unit
+
 package cipher
 
 import (
 	"encoding/base64"
-	"github.com/kibaamor/gojwt/util"
-	"github.com/stretchr/testify/assert"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
+
+	"github.com/kibaamor/gojwt/utils"
 )
 
 func TestAESCBCCipher_NameKeySizeIVSize(t *testing.T) {
@@ -37,9 +41,9 @@ func TestAESCBCCipher_NameKeySizeIVSize(t *testing.T) {
 	t.Parallel()
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			key := util.RandBytes(tt.keySize)
+			key := utils.RandBytes(tt.keySize)
 			c := NewAESCBCCipher(tt.id, key)
-			assert.Equal(t, tt.id, c.Id())
+			assert.Equal(t, tt.id, c.ID())
 			assert.Equal(t, tt.name, c.Name())
 			assert.Equal(t, tt.keySize, c.KeySize())
 			assert.Equal(t, tt.ivSize, c.IVSize())

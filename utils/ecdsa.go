@@ -1,4 +1,4 @@
-package util
+package utils
 
 import (
 	"crypto/ecdsa"
@@ -10,8 +10,8 @@ import (
 )
 
 var (
-	errInvalidECDSAPrivateKeyData = errors.New("util/ecdsa: invalid ECDSA private key")
-	errInvalidECDSAPublicKeyData  = errors.New("util/ecdsa: invalid ECDSA public key")
+	errInvalidECDSAPrivateKeyData = errors.New("utils/ecdsa: invalid ECDSA private key")
+	errInvalidECDSAPublicKeyData  = errors.New("utils/ecdsa: invalid ECDSA public key")
 )
 
 func ParseECDSAPrivateKeyFromBytes(data []byte) (*ecdsa.PrivateKey, error) {

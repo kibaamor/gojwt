@@ -1,2 +1,72 @@
+# Config file reference: https://golangci-lint.run/usage/configuration/#config-file
+
+# List of available linters: https://golangci-lint.run/usage/linters/
+linters:
+  enable:
+    - bodyclose
+    - durationcheck
+    - goconst
+    - gocritic
+    - misspell
+    - nilerr
+    - revive
+    - whitespace
+    - unconvert
+    - goimports
+
+linters-settings:
+  goimports:
+    # Put imports beginning with prefix after 3rd-party packages.
+    local-prefixes: github.com/kibaamor/gojwt
+
+  # https://go-critic.com/overview
+  gocritic:
+    disabled-checks:
+      - ifElseChain
+      - exitAfterDefer
+
+  # https://github.com/mgechev/revive/blob/master/RULES_DESCRIPTIONS.md
+  revive:
+    enable-all-rules: true
+    ignore-generated-header: true
+
+    rules:
+      # Configured
+      - name: argument-limit
+        arguments: [8]
+      - name: cyclomatic
+        arguments: [20]
+      - name: cognitive-complexity
+        arguments: [21]
+      - name: unhandled-error
+        arguments: ["os.Setenv", "fmt.Fprintf", "fmt.Print", "fmt.Println"]
+
+      # Disabled
+      - name: max-public-structs
+        disabled: true
+      - name: function-length
+        disabled: true
+      - name: banned-characters
+        disabled: true
+      - name: function-result-limit
+        disabled: true
+      - name: file-header
+        disabled: true
+      - name: line-length-limit
+        disabled: true
+      - name: add-constant
+        disabled: true
+      - name: modifies-parameter
+        disabled: true
+      - name:  flag-parameter
+        disabled: true
+      - name: confusing-results
+        disabled: true
+      - name: nested-structs
+        disabled: true
+
 run:
   timeout: 10m
+
+  build-tags:
+    - test

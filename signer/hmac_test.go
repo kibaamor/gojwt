@@ -1,9 +1,12 @@
+//go:build test || unit
+
 package signer
 
 import (
 	"encoding/base64"
-	"github.com/stretchr/testify/assert"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestNewHMACSigner(t *testing.T) {
@@ -29,11 +32,11 @@ func TestNewHMACSigner(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			signer := NewHMACSigner(tt.id, tt.name, []byte(tt.name))
-			assert.Equal(t, tt.id, signer.Id())
+			assert.Equal(t, tt.id, signer.ID())
 			assert.Equal(t, tt.name, signer.Name())
 
 			verifier := signer.Verifier()
-			assert.Equal(t, tt.id, verifier.Id())
+			assert.Equal(t, tt.id, verifier.ID())
 			assert.Equal(t, tt.name, verifier.Name())
 		})
 	}

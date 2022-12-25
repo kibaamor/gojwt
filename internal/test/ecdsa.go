@@ -1,8 +1,11 @@
+//go:build test || unit
+
 package test
 
 import (
 	"crypto/ecdsa"
-	"github.com/kibaamor/gojwt/util"
+
+	"github.com/kibaamor/gojwt/utils"
 )
 
 var (
@@ -73,14 +76,14 @@ scrBWqZ/Xkl9tfFxawQ=
 `
 
 	parsePri := func(s string) *ecdsa.PrivateKey {
-		pri, err := util.ParseECDSAPrivateKeyFromPemBytes([]byte(s))
+		pri, err := utils.ParseECDSAPrivateKeyFromPemBytes([]byte(s))
 		if err != nil {
 			panic(err)
 		}
 		return pri
 	}
 	parsePub := func(s string) *ecdsa.PublicKey {
-		pub, err := util.ParseECDSAPublicKeyFromPemBytes([]byte(s))
+		pub, err := utils.ParseECDSAPublicKeyFromPemBytes([]byte(s))
 		if err != nil {
 			panic(err)
 		}

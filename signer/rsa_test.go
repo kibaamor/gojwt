@@ -1,10 +1,14 @@
+//go:build test || unit
+
 package signer
 
 import (
 	"encoding/base64"
-	"github.com/kibaamor/gojwt/internal/test"
-	"github.com/stretchr/testify/assert"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
+
+	"github.com/kibaamor/gojwt/internal/test"
 )
 
 func TestNewRSASignerAndVerifier(t *testing.T) {
@@ -42,15 +46,15 @@ func TestNewRSASignerAndVerifier(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			signer := NewRSASigner(tt.id, tt.name, test.RSAPrivateKey)
-			assert.Equal(t, tt.id, signer.Id())
+			assert.Equal(t, tt.id, signer.ID())
 			assert.Equal(t, tt.name, signer.Name())
 
 			verifier := signer.Verifier()
-			assert.Equal(t, tt.id, verifier.Id())
+			assert.Equal(t, tt.id, verifier.ID())
 			assert.Equal(t, tt.name, verifier.Name())
 
 			verifier = NewRSAVerifier(tt.id, tt.name, test.RSAPublicKey)
-			assert.Equal(t, tt.id, verifier.Id())
+			assert.Equal(t, tt.id, verifier.ID())
 			assert.Equal(t, tt.name, verifier.Name())
 		})
 	}

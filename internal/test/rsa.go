@@ -1,8 +1,11 @@
+//go:build test || unit
+
 package test
 
 import (
 	"crypto/rsa"
-	"github.com/kibaamor/gojwt/util"
+
+	"github.com/kibaamor/gojwt/utils"
 )
 
 var (
@@ -55,11 +58,11 @@ xmOvLKImyzi8sshy3mb0WTN1nr7J/rd0A5wfR5HtmiOyWfSey887d9eImRe0ZKAy
 `
 
 	var err error
-	RSAPrivateKey, err = util.ParseRSAPrivateKeyFromPemBytes([]byte(pri))
+	RSAPrivateKey, err = utils.ParseRSAPrivateKeyFromPemBytes([]byte(pri))
 	if err != nil {
 		panic(err)
 	}
-	RSAPublicKey, err = util.ParseRSAPublicKeyFromPemBytes([]byte(pub))
+	RSAPublicKey, err = utils.ParseRSAPublicKeyFromPemBytes([]byte(pub))
 	if err != nil {
 		panic(err)
 	}

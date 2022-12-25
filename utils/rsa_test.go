@@ -1,4 +1,6 @@
-package util
+//go:build test || unit
+
+package utils
 
 import (
 	"bytes"
@@ -7,9 +9,10 @@ import (
 	"crypto/x509"
 	"encoding/base64"
 	"encoding/pem"
-	"github.com/stretchr/testify/assert"
 	"os"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func genRSAKeyBytes(isPrivate, isPKCS1, pemEncoded bool) (privateKey *rsa.PrivateKey, data []byte) {
@@ -58,7 +61,7 @@ func genRSAKeyBytes(isPrivate, isPKCS1, pemEncoded bool) (privateKey *rsa.Privat
 		data = b.Bytes()
 	}
 
-	return
+	return privateKey, data
 }
 
 func TestParseRSAPrivateKeyFromBytesOrBase64(t *testing.T) {

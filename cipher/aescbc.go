@@ -3,11 +3,10 @@ package cipher
 import (
 	"crypto/aes"
 	"crypto/cipher"
-	"crypto/rand"
 	"errors"
 	"fmt"
-	"github.com/kibaamor/gojwt/util"
-	"io"
+
+	"github.com/kibaamor/gojwt/utils"
 )
 
 var (
@@ -22,7 +21,7 @@ type aesCBCCipher struct {
 	block   cipher.Block
 }
 
-func (c *aesCBCCipher) Id() string {
+func (c *aesCBCCipher) ID() string {
 	return c.id
 }
 
@@ -38,21 +37,12 @@ func (c *aesCBCCipher) IVSize() int {
 	return c.block.BlockSize()
 }
 
-func (c *aesCBCCipher) GenerateIV() []byte {
-	iv := make([]byte, c.block.BlockSize())
-	_, err := io.ReadFull(rand.Reader, iv)
-	if err != nil {
-		panic(err)
-	}
-	return iv
-}
-
 func (c *aesCBCCipher) Encrypt(data, iv []byte) ([]byte, error) {
 	if len(iv) != c.block.BlockSize() {
 		return nil, errAESCBCIV
 	}
 
-	data = util.PKCS7Padding(data, c.block.BlockSize())
+	data = utils.PKCS7Padding(data, c.block.BlockSize())
 	blockMode := cipher.NewCBCEncrypter(c.block, iv)
 	blockMode.CryptBlocks(data, data)
 	return data, nil
@@ -68,7 +58,7 @@ func (c *aesCBCCipher) Decrypt(data, iv []byte) ([]byte, error) {
 
 	blockMode := cipher.NewCBCDecrypter(c.block, iv)
 	blockMode.CryptBlocks(data, data)
-	return util.PKCS7Unpadding(data)
+	return utils.PKCS7Unpadding(data)
 }
 
 func NewAESCBCCipher(id string, key []byte) Cipher {

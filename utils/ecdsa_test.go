@@ -1,4 +1,6 @@
-package util
+//go:build test || unit
+
+package utils
 
 import (
 	"bytes"
@@ -8,9 +10,10 @@ import (
 	"crypto/x509"
 	"encoding/base64"
 	"encoding/pem"
-	"github.com/stretchr/testify/assert"
 	"os"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func genECDSAKeyBytes(curve elliptic.Curve, isPrivate, privateIsPKCS, pemEncoded bool) (privateKey *ecdsa.PrivateKey, data []byte) {
@@ -58,7 +61,7 @@ func genECDSAKeyBytes(curve elliptic.Curve, isPrivate, privateIsPKCS, pemEncoded
 		data = b.Bytes()
 	}
 
-	return
+	return privateKey, data
 }
 
 func TestParseECDSAPrivateKeyFromBytesOrBase64(t *testing.T) {

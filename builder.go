@@ -3,72 +3,85 @@ package gojwt
 import (
 	"encoding/base64"
 	"encoding/json"
+
 	"github.com/kibaamor/gojwt/cipher"
 	"github.com/kibaamor/gojwt/signer"
-	"github.com/kibaamor/gojwt/util"
+	"github.com/kibaamor/gojwt/utils"
+)
+
+// https://www.rfc-editor.org/rfc/rfc7519.html#page-18
+const (
+	NoneAlgNameAbbr = "none"
+	JWTNameAbbr     = "JWT"
+	JWENameAbbr     = "JWE"
 )
 
 type Builder struct {
-	*Token
-	Signer signer.Signer
-	Cipher cipher.Cipher
+	Token
+	Signer      signer.Signer
+	Cipher      cipher.Cipher
+	IVGenerator func(int) []byte
 }
 
 func NewBuilder() *Builder {
-	return &Builder{
-		Token: NewToken(),
-	}
+	return &Builder{Token: NewBasicToken()}
 }
 
-func (b *Builder) WithCipher(cipher cipher.Cipher) *Builder {
-	b.Cipher = cipher
+func NewBuildWithToken(token Token) *Builder {
+	return &Builder{Token: token}
+}
+
+func (b *Builder) WithSigner(s signer.Signer) *Builder {
+	b.Signer = s
 	return b
 }
 
-func (b *Builder) WithSigner(signer signer.Signer) *Builder {
-	b.Signer = signer
+func (b *Builder) WithCipher(c cipher.Cipher) *Builder {
+	b.Cipher = c
+	return b
+}
+
+func (b *Builder) WithIVGenerator(f func(int) []byte) *Builder {
+	b.IVGenerator = f
 	return b
 }
 
 func (b *Builder) GenerateIV() []byte {
-	var iv []byte
-	if b.Cipher != nil {
-		iv = util.RandBytes(b.Cipher.IVSize())
+	ivSize := b.Cipher.IVSize()
+	if b.IVGenerator != nil {
+		return b.IVGenerator(ivSize)
 	}
-	return iv
+	return utils.RandBytes(ivSize)
 }
 
 func (b *Builder) Sign() (string, error) {
-	return b.SignWithIV(b.GenerateIV())
-}
-
-func (b *Builder) SignWithIV(iv []byte) (string, error) {
 	if b.Signer == nil {
-		b.setAlgorithmNone()
+		b.Header.SetAlgorithm(NoneAlgNameAbbr)
 	} else {
-		b.setAlgorithm(b.Signer.Name()).
-			setSignerId(b.Signer.Id())
+		b.Header.SetAlgorithm(b.Signer.Name())
+		b.Header.SetSignerID(b.Signer.ID())
 	}
 
 	var enc = base64.RawURLEncoding
+	var iv []byte
 
 	if b.Cipher == nil {
-		b.setTypeJWT()
+		b.Header.SetType(JWTNameAbbr)
 	} else {
-		b.setTypeJWE().
-			setEncryption(b.Cipher.Name()).
-			setCipherId(b.Cipher.Id())
-		if len(iv) > 0 {
-			b.setIV(enc.EncodeToString(iv))
-		}
+		iv = b.GenerateIV()
+
+		b.Header.SetType(JWENameAbbr)
+		b.Header.SetEncryption(b.Cipher.Name())
+		b.Header.SetCipherID(b.Cipher.ID())
+		b.Header.SetIV(enc.EncodeToString(iv))
 	}
 
-	headers, err := json.Marshal(b.Headers)
+	headers, err := json.Marshal(b.Header)
 	if err != nil {
 		return "", err
 	}
 
-	bodies, err := json.Marshal(b.Bodies)
+	bodies, err := json.Marshal(b.Body)
 	if err != nil {
 		return "", err
 	}
@@ -102,10 +115,10 @@ func (b *Builder) SignWithIV(iv []byte) (string, error) {
 
 	signature, err := b.Signer.Sign(jwtWithoutSignature[:dataLen])
 	if err != nil {
-		return "", nil
+		return "", err
 	}
 
-	encodedSignature := util.RawURLEncode(signature)
+	encodedSignature := utils.RawURLEncode(signature)
 
 	return string(append(jwtWithoutSignature, encodedSignature...)), nil
 }

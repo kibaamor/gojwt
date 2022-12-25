@@ -3,8 +3,8 @@ package signer
 import (
 	"crypto"
 	"crypto/hmac"
-	_ "crypto/sha256"
-	_ "crypto/sha512"
+	_ "crypto/sha256" // init
+	_ "crypto/sha512" // init
 	"errors"
 	"fmt"
 )
@@ -18,7 +18,7 @@ type hmacSigner struct {
 	key  []byte
 }
 
-func (s *hmacSigner) Id() string {
+func (s *hmacSigner) ID() string {
 	return s.id
 }
 
@@ -39,8 +39,11 @@ func (s *hmacSigner) Verify(data, signature []byte) error {
 
 func (s *hmacSigner) Sign(data []byte) ([]byte, error) {
 	h := hmac.New(s.hash.New, s.key)
-	h.Write(data)
-	return h.Sum(nil), nil
+	_, err := h.Write(data)
+	if err != nil {
+		return nil, err
+	}
+	return h.Sum(nil), err
 }
 
 func (s *hmacSigner) Verifier() Verifier {

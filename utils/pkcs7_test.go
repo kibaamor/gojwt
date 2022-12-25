@@ -1,8 +1,11 @@
-package util
+//go:build test || unit
+
+package utils
 
 import (
-	"github.com/stretchr/testify/assert"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestPKCS7Padding(t *testing.T) {

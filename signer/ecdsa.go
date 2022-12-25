@@ -19,7 +19,7 @@ type ecdsaVerifier struct {
 	publicKey *ecdsa.PublicKey
 }
 
-func (s *ecdsaVerifier) Id() string {
+func (s *ecdsaVerifier) ID() string {
 	return s.id
 }
 
@@ -33,7 +33,10 @@ func (s *ecdsaVerifier) Verify(data, signature []byte) error {
 	}
 
 	h := s.hash.New()
-	h.Write(data)
+	_, err := h.Write(data)
+	if err != nil {
+		return err
+	}
 
 	vr := big.NewInt(0).SetBytes(signature[:s.keySize])
 	vs := big.NewInt(0).SetBytes(signature[s.keySize:])
@@ -50,7 +53,10 @@ type ecdsaSigner struct {
 
 func (s *ecdsaSigner) Sign(data []byte) ([]byte, error) {
 	h := s.hash.New()
-	h.Write(data)
+	_, err := h.Write(data)
+	if err != nil {
+		return nil, err
+	}
 
 	vr, vs, err := ecdsa.Sign(rand.Reader, s.privateKey, h.Sum(nil))
 	if err != nil {
@@ -71,12 +77,12 @@ func (s *ecdsaSigner) Verifier() Verifier {
 func getECDSAKeySize(curveBits int) int {
 	keySize := curveBits / 8
 	if curveBits%8 > 0 {
-		keySize += 1
+		keySize++
 	}
 	return keySize
 }
 
-func newECDSAVerifier(id, name string, hash crypto.Hash, publicKey *ecdsa.PublicKey, curveBits int, curveName string) Verifier {
+func newECDSAVerifierInternal(id, name string, hash crypto.Hash, publicKey *ecdsa.PublicKey, curveBits int, curveName string) Verifier {
 	if !hash.Available() {
 		panic(fmt.Sprintf("signer/ecdsa: invalid hash '%v'", hash))
 	}
@@ -98,7 +104,7 @@ func newECDSAVerifier(id, name string, hash crypto.Hash, publicKey *ecdsa.Public
 	}
 }
 
-func newECDSASigner(id, name string, hash crypto.Hash, privateKey *ecdsa.PrivateKey, curveBits int, curveName string) Signer {
+func newECDSASignerInternal(id, name string, hash crypto.Hash, privateKey *ecdsa.PrivateKey, curveBits int, curveName string) Signer {
 	if !hash.Available() {
 		panic(fmt.Sprintf("signer/ecdsa: invalid hash '%v'", hash))
 	}
@@ -124,24 +130,24 @@ func newECDSASigner(id, name string, hash crypto.Hash, privateKey *ecdsa.Private
 }
 
 func NewES256Verifier(id string, publicKey *ecdsa.PublicKey) Verifier {
-	return newECDSAVerifier(id, "ES256", crypto.SHA256, publicKey, 256, "P-256")
+	return newECDSAVerifierInternal(id, "ES256", crypto.SHA256, publicKey, 256, "P-256")
 }
 func NewES256Signer(id string, privateKey *ecdsa.PrivateKey) Signer {
-	return newECDSASigner(id, "ES256", crypto.SHA256, privateKey, 256, "P-256")
+	return newECDSASignerInternal(id, "ES256", crypto.SHA256, privateKey, 256, "P-256")
 }
 
 func NewES384Verifier(id string, publicKey *ecdsa.PublicKey) Verifier {
-	return newECDSAVerifier(id, "ES384", crypto.SHA384, publicKey, 384, "P-384")
+	return newECDSAVerifierInternal(id, "ES384", crypto.SHA384, publicKey, 384, "P-384")
 }
 func NewES384Signer(id string, privateKey *ecdsa.PrivateKey) Signer {
-	return newECDSASigner(id, "ES384", crypto.SHA384, privateKey, 384, "P-384")
+	return newECDSASignerInternal(id, "ES384", crypto.SHA384, privateKey, 384, "P-384")
 }
 
 func NewES512Verifier(id string, publicKey *ecdsa.PublicKey) Verifier {
-	return newECDSAVerifier(id, "ES512", crypto.SHA512, publicKey, 521, "P-521")
+	return newECDSAVerifierInternal(id, "ES512", crypto.SHA512, publicKey, 521, "P-521")
 }
 func NewES512Signer(id string, privateKey *ecdsa.PrivateKey) Signer {
-	return newECDSASigner(id, "ES512", crypto.SHA512, privateKey, 521, "P-521")
+	return newECDSASignerInternal(id, "ES512", crypto.SHA512, privateKey, 521, "P-521")
 }
 
 func NewECDSAVerifier(id, name string, publicKey *ecdsa.PublicKey) Verifier {

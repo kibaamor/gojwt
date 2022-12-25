@@ -1,7 +1,7 @@
 package cipher
 
 type Cipher interface {
-	Id() string
+	ID() string
 	Name() string
 	KeySize() int
 	IVSize() int

@@ -1,12 +1,16 @@
+//go:build test || unit
+
 package signer
 
 import (
 	"crypto/ecdsa"
 	"crypto/elliptic"
 	"crypto/rand"
-	"github.com/kibaamor/gojwt/internal/test"
-	"github.com/stretchr/testify/assert"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
+
+	"github.com/kibaamor/gojwt/internal/test"
 )
 
 func TestNewECDSASignerAndVerifier(t *testing.T) {
@@ -40,15 +44,15 @@ func TestNewECDSASignerAndVerifier(t *testing.T) {
 			publicKey := &privateKey.PublicKey
 
 			signer := NewECDSASigner(tt.id, tt.name, privateKey)
-			assert.Equal(t, tt.id, signer.Id())
+			assert.Equal(t, tt.id, signer.ID())
 			assert.Equal(t, tt.name, signer.Name())
 
 			verifier := signer.Verifier()
-			assert.Equal(t, tt.id, verifier.Id())
+			assert.Equal(t, tt.id, verifier.ID())
 			assert.Equal(t, tt.name, verifier.Name())
 
 			verifier = NewECDSAVerifier(tt.id, tt.name, publicKey)
-			assert.Equal(t, tt.id, verifier.Id())
+			assert.Equal(t, tt.id, verifier.ID())
 			assert.Equal(t, tt.name, verifier.Name())
 		})
 	}

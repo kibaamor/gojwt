@@ -1,4 +1,4 @@
-package util
+package utils
 
 import (
 	"crypto/rsa"
@@ -10,8 +10,8 @@ import (
 )
 
 var (
-	errInvalidRSAPrivateKeyData = errors.New("util/rsa: invalid RSA private key")
-	errInvalidRSAPublicKeyData  = errors.New("util/rsa: invalid RSA public key")
+	errInvalidRSAPrivateKeyData = errors.New("utils/rsa: invalid RSA private key")
+	errInvalidRSAPublicKeyData  = errors.New("utils/rsa: invalid RSA public key")
 )
 
 func ParseRSAPrivateKeyFromBytes(data []byte) (*rsa.PrivateKey, error) {
