@@ -64,7 +64,7 @@ func (c *aesCBCCipher) Decrypt(data, iv []byte) ([]byte, error) {
 func NewAESCBCCipher(id string, key []byte) (Cipher, error) {
 	block, err := aes.NewCipher(key)
 	if err != nil {
-		return nil, fmt.Errorf("cipher/aescbc: invalid aes key: '%v'", err.Error())
+		return nil, fmt.Errorf("cipher/aescbc: invalid aes key: '%w'", err)
 	}
 	return &aesCBCCipher{
 		id:      id,

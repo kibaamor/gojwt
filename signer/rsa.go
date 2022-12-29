@@ -92,7 +92,7 @@ func newRSASignerInternal(isPSS bool, id, name string, hash crypto.Hash, private
 	}
 	err := privateKey.Validate()
 	if err != nil {
-		return nil, fmt.Errorf("signer/rsa: invalid private key: '%v'", err.Error())
+		return nil, fmt.Errorf("signer/rsa: invalid private key: '%w'", err)
 	}
 	return &rsaSigner{
 		rsaVerifier: rsaVerifier{
