@@ -43,12 +43,16 @@ func NewChecker(token Token) *Checker {
 }
 
 func (c *Checker) AllowVerifier(ve Verifier) *Checker {
-	c.Verifiers[ve.ID()] = ve
+	if ve != nil {
+		c.Verifiers[ve.ID()] = ve
+	}
 	return c
 }
 
 func (c *Checker) AllowCipher(ci Cipher) *Checker {
-	c.Ciphers[ci.ID()] = ci
+	if ci != nil {
+		c.Ciphers[ci.ID()] = ci
+	}
 	return c
 }
 
