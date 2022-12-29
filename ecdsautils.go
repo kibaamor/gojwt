@@ -1,4 +1,4 @@
-package utils
+package gojwt
 
 import (
 	"crypto/ecdsa"
@@ -10,8 +10,8 @@ import (
 )
 
 var (
-	errInvalidECDSAPrivateKeyData = errors.New("utils/ecdsa: invalid ECDSA private key")
-	errInvalidECDSAPublicKeyData  = errors.New("utils/ecdsa: invalid ECDSA public key")
+	errECDSAPrivateKeyData = errors.New("gojwt/ecdsautils: invalid ECDSA private key")
+	errECDSAPublicKeyData  = errors.New("gojwt/ecdsautils: invalid ECDSA public key")
 )
 
 func ParseECDSAPrivateKeyFromBytes(data []byte) (*ecdsa.PrivateKey, error) {
@@ -28,7 +28,7 @@ func ParseECDSAPrivateKeyFromBytes(data []byte) (*ecdsa.PrivateKey, error) {
 
 	privateKey, ok := parsedKey.(*ecdsa.PrivateKey)
 	if !ok {
-		return nil, errInvalidECDSAPrivateKeyData
+		return nil, errECDSAPrivateKeyData
 	}
 
 	return privateKey, nil
@@ -46,7 +46,7 @@ func ParseECDSAPublicKeyFromBytes(data []byte) (*ecdsa.PublicKey, error) {
 
 	publicKey, ok := parsedKey.(*ecdsa.PublicKey)
 	if !ok {
-		return nil, errInvalidECDSAPublicKeyData
+		return nil, errECDSAPublicKeyData
 	}
 
 	return publicKey, nil

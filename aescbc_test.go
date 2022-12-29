@@ -1,14 +1,14 @@
 //go:build test || unit
 
-package cipher
+package gojwt
 
 import (
 	"encoding/base64"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/kibaamor/gojwt/internal/utils"
 
-	"github.com/kibaamor/gojwt/utils"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestAESCBCCipher_NameKeySizeIVSize(t *testing.T) {

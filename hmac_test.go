@@ -1,6 +1,6 @@
 //go:build test || unit
 
-package signer
+package gojwt
 
 import (
 	"encoding/base64"

@@ -1,6 +1,6 @@
 //go:build test || unit
 
-package utils
+package gojwt
 
 import (
 	"bytes"
@@ -11,6 +11,8 @@ import (
 	"encoding/pem"
 	"os"
 	"testing"
+
+	"github.com/kibaamor/gojwt/internal/utils"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -202,7 +204,7 @@ func TestParseRSAPrivateKeyFromPemBytesOrFile(t *testing.T) {
 			)
 			if tt.isFile {
 				var filename string
-				filename, err = WriteToTempFile("", "rsa_test", data)
+				filename, err = utils.WriteToTempFile("", "rsa_test", data)
 				assert.Nil(t, err)
 				parsedPrivateKey, err = ParseRSAPrivateKeyFromPemFile(filename)
 				_ = os.Remove(filename)
@@ -256,7 +258,7 @@ func TestParseRSAPublicKeyFromPemBytesOrFile(t *testing.T) {
 			)
 			if tt.isFile {
 				var filename string
-				filename, err = WriteToTempFile("", "rsa_test", data)
+				filename, err = utils.WriteToTempFile("", "rsa_test", data)
 				assert.Nil(t, err)
 				parsedPublicKey, err = ParseRSAPublicKeyFromPemFile(filename)
 				_ = os.Remove(filename)

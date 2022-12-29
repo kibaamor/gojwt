@@ -4,9 +4,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 
-	"github.com/kibaamor/gojwt/cipher"
-	"github.com/kibaamor/gojwt/signer"
-	"github.com/kibaamor/gojwt/utils"
+	utils2 "github.com/kibaamor/gojwt/internal/utils"
 )
 
 // https://www.rfc-editor.org/rfc/rfc7519.html#page-18
@@ -18,8 +16,8 @@ const (
 
 type Builder struct {
 	Token
-	Signer      signer.Signer
-	Cipher      cipher.Cipher
+	Signer      Signer
+	Cipher      Cipher
 	IVGenerator func(int) []byte
 }
 
@@ -31,12 +29,12 @@ func NewBuildWithToken(token Token) *Builder {
 	return &Builder{Token: token}
 }
 
-func (b *Builder) WithSigner(s signer.Signer) *Builder {
+func (b *Builder) WithSigner(s Signer) *Builder {
 	b.Signer = s
 	return b
 }
 
-func (b *Builder) WithCipher(c cipher.Cipher) *Builder {
+func (b *Builder) WithCipher(c Cipher) *Builder {
 	b.Cipher = c
 	return b
 }
@@ -51,7 +49,7 @@ func (b *Builder) GenerateIV() []byte {
 	if b.IVGenerator != nil {
 		return b.IVGenerator(ivSize)
 	}
-	return utils.RandBytes(ivSize)
+	return utils2.RandBytes(ivSize)
 }
 
 func (b *Builder) Sign() (string, error) {
@@ -118,7 +116,7 @@ func (b *Builder) Sign() (string, error) {
 		return "", err
 	}
 
-	encodedSignature := utils.RawURLEncode(signature)
+	encodedSignature := utils2.RawURLEncode(signature)
 
 	return string(append(jwtWithoutSignature, encodedSignature...)), nil
 }

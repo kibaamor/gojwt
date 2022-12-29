@@ -7,28 +7,26 @@ import (
 	"errors"
 	"time"
 
-	"github.com/kibaamor/gojwt/cipher"
-	"github.com/kibaamor/gojwt/signer"
-	"github.com/kibaamor/gojwt/utils"
+	utils2 "github.com/kibaamor/gojwt/internal/utils"
 )
 
 var (
-	errJWT            = errors.New("checker: invalid jwt string")
-	errSignerID       = errors.New("checker: invalid signer id")
-	errCipherID       = errors.New("checker: invalid cipher id")
-	errCipherMismatch = errors.New("checker: cipher name mismatch")
-	errExpiresAt      = errors.New("checker: invalid token(after ExpiresAt)")
-	errNotBefore      = errors.New("checker: invalid token(before NotBefore)")
-	errIssuer         = errors.New("checker: invalid issuer")
-	errSubject        = errors.New("checker: invalid subject")
-	errAudience       = errors.New("checker: invalid audience")
-	errJwtID          = errors.New("checker: invalid jwt id")
+	errJWT            = errors.New("gojwt/checker: invalid jwt string")
+	errSignerID       = errors.New("gojwt/checker: invalid signer id")
+	errCipherID       = errors.New("gojwt/checker: invalid cipher id")
+	errCipherMismatch = errors.New("gojwt/checker: cipher name mismatch")
+	errExpiresAt      = errors.New("gojwt/checker: invalid token(after ExpiresAt)")
+	errNotBefore      = errors.New("gojwt/checker: invalid token(before NotBefore)")
+	errIssuer         = errors.New("gojwt/checker: invalid issuer")
+	errSubject        = errors.New("gojwt/checker: invalid subject")
+	errAudience       = errors.New("gojwt/checker: invalid audience")
+	errJwtID          = errors.New("gojwt/checker: invalid jwt id")
 )
 
 type Checker struct {
 	Token     Token
-	Verifiers map[string]signer.Verifier
-	Ciphers   map[string]cipher.Cipher
+	Verifiers map[string]Verifier
+	Ciphers   map[string]Cipher
 	Issuers   []string
 	Subjects  []string
 	Audiences []string
@@ -39,17 +37,17 @@ type Checker struct {
 func NewChecker(token Token) *Checker {
 	return &Checker{
 		Token:     token,
-		Verifiers: make(map[string]signer.Verifier),
-		Ciphers:   make(map[string]cipher.Cipher),
+		Verifiers: make(map[string]Verifier),
+		Ciphers:   make(map[string]Cipher),
 	}
 }
 
-func (c *Checker) AllowVerifier(ve signer.Verifier) *Checker {
+func (c *Checker) AllowVerifier(ve Verifier) *Checker {
 	c.Verifiers[ve.ID()] = ve
 	return c
 }
 
-func (c *Checker) AllowCipher(ci cipher.Cipher) *Checker {
+func (c *Checker) AllowCipher(ci Cipher) *Checker {
 	c.Ciphers[ci.ID()] = ci
 	return c
 }
@@ -96,7 +94,7 @@ func (c *Checker) Check(jwt string) (*Token, error) {
 		return nil, err
 	}
 
-	bodiesBytes, err := utils.RawURLDecode(segments[1])
+	bodiesBytes, err := utils2.RawURLDecode(segments[1])
 	if err != nil {
 		return nil, err
 	}
@@ -113,7 +111,7 @@ func (c *Checker) Check(jwt string) (*Token, error) {
 }
 
 func (c *Checker) unmarshalHeaders(data []byte) error {
-	data, err := utils.RawURLDecode(data)
+	data, err := utils2.RawURLDecode(data)
 	if err != nil {
 		return err
 	}
@@ -134,7 +132,7 @@ func (c *Checker) checkAlgorithm(data, signature []byte) error {
 	}
 
 	var err error
-	if signature, err = utils.RawURLDecode(signature); err != nil {
+	if signature, err = utils2.RawURLDecode(signature); err != nil {
 		return err
 	}
 
@@ -178,21 +176,21 @@ func (c *Checker) checkToken() error {
 
 	if len(c.Issuers) > 0 {
 		issuer := c.Token.Body.GetIssuer()
-		if len(issuer) == 0 || !utils.Contains(c.Issuers, issuer) {
+		if len(issuer) == 0 || !utils2.Contains(c.Issuers, issuer) {
 			return errIssuer
 		}
 	}
 
 	if len(c.Subjects) > 0 {
 		subject := c.Token.Body.GetSubject()
-		if len(subject) == 0 || !utils.Contains(c.Subjects, subject) {
+		if len(subject) == 0 || !utils2.Contains(c.Subjects, subject) {
 			return errSubject
 		}
 	}
 
 	if len(c.JwtIDs) > 0 {
 		jwtID := c.Token.Body.GetJwtID()
-		if len(jwtID) == 0 || !utils.Contains(c.JwtIDs, jwtID) {
+		if len(jwtID) == 0 || !utils2.Contains(c.JwtIDs, jwtID) {
 			return errJwtID
 		}
 	}
@@ -228,7 +226,7 @@ func (c *Checker) checkTokenAudience() error {
 
 	contains := false
 	for _, audience := range audiences {
-		contains = utils.Contains(c.Audiences, audience)
+		contains = utils2.Contains(c.Audiences, audience)
 		if contains {
 			break
 		}

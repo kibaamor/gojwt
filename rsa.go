@@ -1,4 +1,4 @@
-package signer
+package gojwt
 
 import (
 	"crypto"
@@ -9,6 +9,9 @@ import (
 )
 
 var (
+	errRSAPublicKey  = errors.New("gojwt/rsa: invalid public key")
+	errRSAPrivateKey = errors.New("gojwt/rsa: invalid private key")
+
 	rsaPSSVerifyOptions = &rsa.PSSOptions{
 		SaltLength: rsa.PSSSaltLengthAuto,
 	}
@@ -69,10 +72,10 @@ func (s *rsaSigner) Verifier() Verifier {
 
 func newRSAVerifierInternal(isPSS bool, id, name string, hash crypto.Hash, publicKey *rsa.PublicKey) (Verifier, error) {
 	if !hash.Available() {
-		return nil, fmt.Errorf("signer/rsa: invalid hash '%v'", hash)
+		return nil, fmt.Errorf("gojwt/rsa: invalid hash '%v'", hash)
 	}
 	if publicKey == nil {
-		return nil, errors.New("signer/rsa: invalid public key")
+		return nil, errRSAPublicKey
 	}
 	return &rsaVerifier{
 		isPSS:     isPSS,
@@ -85,14 +88,14 @@ func newRSAVerifierInternal(isPSS bool, id, name string, hash crypto.Hash, publi
 
 func newRSASignerInternal(isPSS bool, id, name string, hash crypto.Hash, privateKey *rsa.PrivateKey) (Signer, error) {
 	if !hash.Available() {
-		return nil, fmt.Errorf("signer/rsa: invalid hash '%v'", hash)
+		return nil, fmt.Errorf("gojwt/rsa: invalid hash '%v'", hash)
 	}
 	if privateKey == nil {
-		return nil, errors.New("signer/rsa: invalid private key")
+		return nil, errRSAPrivateKey
 	}
 	err := privateKey.Validate()
 	if err != nil {
-		return nil, fmt.Errorf("signer/rsa: invalid private key: '%w'", err)
+		return nil, fmt.Errorf("gojwt/rsa: invalid private key: '%w'", err)
 	}
 	return &rsaSigner{
 		rsaVerifier: rsaVerifier{
@@ -162,7 +165,7 @@ func NewRSAVerifier(id string, name string, publicKey *rsa.PublicKey) (Verifier,
 	} else if name == "PS512" {
 		return NewPS512Verifier(id, publicKey)
 	}
-	return nil, fmt.Errorf("signer/rsa: invalid rsa verifier name '%v'", name)
+	return nil, fmt.Errorf("gojwt/rsa: invalid rsa verifier name '%v'", name)
 }
 
 func NewRSASigner(id string, name string, privateKey *rsa.PrivateKey) (Signer, error) {
@@ -179,5 +182,5 @@ func NewRSASigner(id string, name string, privateKey *rsa.PrivateKey) (Signer, e
 	} else if name == "PS512" {
 		return NewPS512Signer(id, privateKey)
 	}
-	return nil, fmt.Errorf("signer/rsa: invalid rsa signer name '%v'", name)
+	return nil, fmt.Errorf("gojwt/rsa: invalid rsa signer name '%v'", name)
 }

@@ -9,13 +9,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/kibaamor/gojwt/claims"
-
 	"github.com/stretchr/testify/assert"
-
-	"github.com/kibaamor/gojwt/cipher"
-	"github.com/kibaamor/gojwt/internal/test"
-	"github.com/kibaamor/gojwt/signer"
 )
 
 var nowForTest time.Time
@@ -131,7 +125,7 @@ func TestBuilder_HMAC(t *testing.T) {
 	t.Parallel()
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			s, err := signer.NewHMACSigner(tt.id, tt.name, []byte(tt.name))
+			s, err := NewHMACSigner(tt.id, tt.name, []byte(tt.name))
 			assert.Nil(t, err)
 			b := createBuilderForTest(tt.name).WithSigner(s)
 
@@ -192,7 +186,7 @@ func TestBuilder_RSA(t *testing.T) {
 	t.Parallel()
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			s, err := signer.NewRSASigner(tt.id, tt.name, test.RSAPrivateKey)
+			s, err := NewRSASigner(tt.id, tt.name, rsaPrivateKeyForTest)
 			assert.Nil(t, err)
 			b := createBuilderForTest(tt.name).WithSigner(s)
 
@@ -211,7 +205,7 @@ func TestBuilder_RSA(t *testing.T) {
 			err = v.Verify(data, sig)
 			assert.Nil(t, err)
 
-			v, err = signer.NewRSAVerifier(tt.id, tt.name, test.RSAPublicKey)
+			v, err = NewRSAVerifier(tt.id, tt.name, rsaPublicKeyForTest)
 			assert.Nil(t, err)
 			err = v.Verify(data, sig)
 			assert.Nil(t, err)
@@ -229,27 +223,27 @@ func TestBuilder_ECDSA(t *testing.T) {
 		{
 			id:         "es256",
 			name:       "ES256",
-			privateKey: test.ECDSAP256PrivateKey,
-			publicKey:  test.ECDSAP256PublicKey,
+			privateKey: ecdsaP256PrivateKeyForTest,
+			publicKey:  ecdsaP256PublicKeyForTest,
 		},
 		{
 			id:         "es384",
 			name:       "ES384",
-			privateKey: test.ECDSAP384PrivateKey,
-			publicKey:  test.ECDSAP384PublicKey,
+			privateKey: ecdsaP384PrivateKeyForTest,
+			publicKey:  ecdsaP384PublicKeyForTest,
 		},
 		{
 			id:         "es512",
 			name:       "ES512",
-			privateKey: test.ECDSAP521PrivateKey,
-			publicKey:  test.ECDSAP521PublicKey,
+			privateKey: ecdsaP521PrivateKeyForTest,
+			publicKey:  ecdsaP521PublicKeyForTest,
 		},
 	}
 
 	t.Parallel()
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			s, err := signer.NewECDSASigner(tt.id, tt.name, tt.privateKey)
+			s, err := NewECDSASigner(tt.id, tt.name, tt.privateKey)
 			assert.Nil(t, err)
 			b := createBuilderForTest(tt.name).WithSigner(s)
 
@@ -265,7 +259,7 @@ func TestBuilder_ECDSA(t *testing.T) {
 			err = v.Verify(data, sig)
 			assert.Nil(t, err)
 
-			v, err = signer.NewECDSAVerifier(tt.id, tt.name, tt.publicKey)
+			v, err = NewECDSAVerifier(tt.id, tt.name, tt.publicKey)
 			assert.Nil(t, err)
 			err = v.Verify(data, sig)
 			assert.Nil(t, err)
@@ -305,7 +299,7 @@ func TestBuilder_AESCBC(t *testing.T) {
 	t.Parallel()
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			c, err := cipher.NewAESCBCCipher(tt.id, []byte(tt.key))
+			c, err := NewAESCBCCipher(tt.id, []byte(tt.key))
 			assert.Nil(t, err)
 			b := createBuilderForTest(tt.name).WithCipher(c).WithIVGenerator(ivGeneratorForTest(iv))
 
@@ -316,22 +310,22 @@ func TestBuilder_AESCBC(t *testing.T) {
 	}
 }
 
-type CustomHeader struct {
-	claims.BasicHeader
+type customHeader struct {
+	BasicHeader
 	CustomHeaderField string
 }
 
-type CustomBody struct {
-	claims.BasicBody
+type customBody struct {
+	BasicBody
 	CustomBodyField string
 }
 
 func TestBuilder_CustomToken(t *testing.T) {
 	b := NewBuildWithToken(Token{
-		Header: &CustomHeader{
+		Header: &customHeader{
 			CustomHeaderField: "custom header value",
 		},
-		Body: &CustomBody{
+		Body: &customBody{
 			CustomBodyField: "custom body value",
 		},
 	})

@@ -5,7 +5,7 @@ import (
 	"errors"
 )
 
-var errPKCS7Padding = errors.New("utils/pkcs7: invalid padding")
+var errPKCS7Padding = errors.New("gojwt/internal/utils/pkcs7: invalid padding")
 
 func PKCS7Padding(data []byte, blockSize int) []byte {
 	padding := blockSize - len(data)%blockSize

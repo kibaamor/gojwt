@@ -7,10 +7,6 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-
-	"github.com/kibaamor/gojwt/cipher"
-	"github.com/kibaamor/gojwt/internal/test"
-	"github.com/kibaamor/gojwt/signer"
 )
 
 func assertChecker(t *testing.T, b *Builder, name, want string) {
@@ -76,7 +72,7 @@ func TestChecker_HMAC(t *testing.T) {
 	t.Parallel()
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			s, err := signer.NewHMACSigner(tt.id, tt.name, []byte(tt.name))
+			s, err := NewHMACSigner(tt.id, tt.name, []byte(tt.name))
 			assert.Nil(t, err)
 			b := createBuilderForTest(tt.name).WithSigner(s)
 			assertChecker(t, b, tt.name, tt.want)
@@ -125,7 +121,7 @@ func TestChecker_RSA(t *testing.T) {
 	t.Parallel()
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			s, err := signer.NewRSASigner(tt.id, tt.name, test.RSAPrivateKey)
+			s, err := NewRSASigner(tt.id, tt.name, rsaPrivateKeyForTest)
 			assert.Nil(t, err)
 			b := createBuilderForTest(tt.name).WithSigner(s)
 			assertChecker(t, b, tt.name, tt.want)
@@ -143,19 +139,19 @@ func TestChecker_ECDSA(t *testing.T) {
 		{
 			id:         "es256",
 			name:       "ES256",
-			privateKey: test.ECDSAP256PrivateKey,
+			privateKey: ecdsaP256PrivateKeyForTest,
 			want:       `{"Header":{"alg":"ES256","typ":"JWT","sid":"es256"},"Body":{"jti":"ES256","issuer":"ES256","subject":"ES256","audience":["ES256","ES256ES256"],"exp":1136217845,"nbf":1136214245,"iat":1136214245}}`,
 		},
 		{
 			id:         "es384",
 			name:       "ES384",
-			privateKey: test.ECDSAP384PrivateKey,
+			privateKey: ecdsaP384PrivateKeyForTest,
 			want:       `{"Header":{"alg":"ES384","typ":"JWT","sid":"es384"},"Body":{"jti":"ES384","issuer":"ES384","subject":"ES384","audience":["ES384","ES384ES384"],"exp":1136217845,"nbf":1136214245,"iat":1136214245}}`,
 		},
 		{
 			id:         "es512",
 			name:       "ES512",
-			privateKey: test.ECDSAP521PrivateKey,
+			privateKey: ecdsaP521PrivateKeyForTest,
 			want:       `{"Header":{"alg":"ES512","typ":"JWT","sid":"es512"},"Body":{"jti":"ES512","issuer":"ES512","subject":"ES512","audience":["ES512","ES512ES512"],"exp":1136217845,"nbf":1136214245,"iat":1136214245}}`,
 		},
 	}
@@ -163,7 +159,7 @@ func TestChecker_ECDSA(t *testing.T) {
 	t.Parallel()
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			s, err := signer.NewECDSASigner(tt.id, tt.name, tt.privateKey)
+			s, err := NewECDSASigner(tt.id, tt.name, tt.privateKey)
 			assert.Nil(t, err)
 			b := createBuilderForTest(tt.name).WithSigner(s)
 			assertChecker(t, b, tt.name, tt.want)
@@ -203,7 +199,7 @@ func TestChecker_AESCBC(t *testing.T) {
 	t.Parallel()
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			c, err := cipher.NewAESCBCCipher(tt.id, []byte(tt.key))
+			c, err := NewAESCBCCipher(tt.id, []byte(tt.key))
 			assert.Nil(t, err)
 			b := createBuilderForTest(tt.name).WithCipher(c).WithIVGenerator(ivGeneratorForTest(iv))
 			assertChecker(t, b, tt.name, tt.want)
@@ -279,9 +275,9 @@ func TestChecker_HMAC_AESCBC(t *testing.T) {
 	t.Parallel()
 	for _, tt := range tests {
 		t.Run(tt.id, func(t *testing.T) {
-			s, err := signer.NewHMACSigner(tt.id, tt.hmacName, []byte(tt.hmacName))
+			s, err := NewHMACSigner(tt.id, tt.hmacName, []byte(tt.hmacName))
 			assert.Nil(t, err)
-			c, err := cipher.NewAESCBCCipher(tt.id, []byte(tt.aesCbcKey))
+			c, err := NewAESCBCCipher(tt.id, []byte(tt.aesCbcKey))
 			assert.Nil(t, err)
 			b := createBuilderForTest(tt.id).WithSigner(s).WithCipher(c).WithIVGenerator(ivGeneratorForTest(iv))
 			assertChecker(t, b, tt.id, tt.want)

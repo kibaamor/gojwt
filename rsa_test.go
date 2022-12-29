@@ -1,14 +1,12 @@
 //go:build test || unit
 
-package signer
+package gojwt
 
 import (
 	"encoding/base64"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-
-	"github.com/kibaamor/gojwt/internal/test"
 )
 
 func TestNewRSASignerAndVerifier(t *testing.T) {
@@ -45,7 +43,7 @@ func TestNewRSASignerAndVerifier(t *testing.T) {
 	t.Parallel()
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			signer, err := NewRSASigner(tt.id, tt.name, test.RSAPrivateKey)
+			signer, err := NewRSASigner(tt.id, tt.name, rsaPrivateKeyForTest)
 			assert.Nil(t, err)
 			assert.Equal(t, tt.id, signer.ID())
 			assert.Equal(t, tt.name, signer.Name())
@@ -54,7 +52,7 @@ func TestNewRSASignerAndVerifier(t *testing.T) {
 			assert.Equal(t, tt.id, verifier.ID())
 			assert.Equal(t, tt.name, verifier.Name())
 
-			verifier, err = NewRSAVerifier(tt.id, tt.name, test.RSAPublicKey)
+			verifier, err = NewRSAVerifier(tt.id, tt.name, rsaPublicKeyForTest)
 			assert.Nil(t, err)
 			assert.Equal(t, tt.id, verifier.ID())
 			assert.Equal(t, tt.name, verifier.Name())
@@ -103,7 +101,7 @@ func TestRSASignerAndVerifier(t *testing.T) {
 	t.Parallel()
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			signer, err := NewRSASigner(tt.id, tt.name, test.RSAPrivateKey)
+			signer, err := NewRSASigner(tt.id, tt.name, rsaPrivateKeyForTest)
 			assert.Nil(t, err)
 
 			data := []byte(tt.name)
@@ -111,7 +109,7 @@ func TestRSASignerAndVerifier(t *testing.T) {
 			sig, err := signer.Sign(data)
 			assert.Nil(t, err)
 
-			verifier, err := NewRSAVerifier(tt.id, tt.name, test.RSAPublicKey)
+			verifier, err := NewRSAVerifier(tt.id, tt.name, rsaPublicKeyForTest)
 			assert.Nil(t, err)
 			err = verifier.Verify(data, sig)
 			assert.Nil(t, err)

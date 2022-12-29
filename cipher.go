@@ -1,4 +1,4 @@
-package cipher
+package gojwt
 
 type Cipher interface {
 	ID() string

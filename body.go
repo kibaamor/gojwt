@@ -1,9 +1,9 @@
-package claims
+package gojwt
 
 import (
 	"time"
 
-	"github.com/kibaamor/gojwt/utils"
+	"github.com/kibaamor/gojwt/internal/utils"
 )
 
 type BodyInterface interface {

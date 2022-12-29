@@ -1,6 +1,6 @@
 //go:build test || unit
 
-package signer
+package gojwt
 
 import (
 	"crypto/ecdsa"
@@ -9,8 +9,6 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-
-	"github.com/kibaamor/gojwt/internal/test"
 )
 
 func TestNewECDSASignerAndVerifier(t *testing.T) {
@@ -70,20 +68,20 @@ func TestECDSASignerAndVerifier(t *testing.T) {
 		{
 			id:         "es256",
 			name:       "ES256",
-			privateKey: test.ECDSAP256PrivateKey,
-			publicKey:  test.ECDSAP256PublicKey,
+			privateKey: ecdsaP256PrivateKeyForTest,
+			publicKey:  ecdsaP256PublicKeyForTest,
 		},
 		{
 			id:         "es384",
 			name:       "ES384",
-			privateKey: test.ECDSAP384PrivateKey,
-			publicKey:  test.ECDSAP384PublicKey,
+			privateKey: ecdsaP384PrivateKeyForTest,
+			publicKey:  ecdsaP384PublicKeyForTest,
 		},
 		{
 			id:         "es512",
 			name:       "ES512",
-			privateKey: test.ECDSAP521PrivateKey,
-			publicKey:  test.ECDSAP521PublicKey,
+			privateKey: ecdsaP521PrivateKeyForTest,
+			publicKey:  ecdsaP521PublicKeyForTest,
 		},
 	}
 

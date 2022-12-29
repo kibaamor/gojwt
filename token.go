@@ -3,19 +3,17 @@ package gojwt
 import (
 	"encoding/json"
 	"time"
-
-	"github.com/kibaamor/gojwt/claims"
 )
 
 type Token struct {
-	Header claims.HeaderInterface
-	Body   claims.BodyInterface
+	Header HeaderInterface
+	Body   BodyInterface
 }
 
 func NewBasicToken() Token {
 	return Token{
-		Header: &claims.BasicHeader{},
-		Body:   &claims.BasicBody{},
+		Header: &BasicHeader{},
+		Body:   &BasicBody{},
 	}
 }
 

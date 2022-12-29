@@ -1,4 +1,4 @@
-package claims
+package gojwt
 
 type HeaderInterface interface {
 	GetAlgorithm() string

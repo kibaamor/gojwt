@@ -1,4 +1,4 @@
-package utils
+package gojwt
 
 import (
 	"crypto/rsa"
@@ -10,8 +10,8 @@ import (
 )
 
 var (
-	errInvalidRSAPrivateKeyData = errors.New("utils/rsa: invalid RSA private key")
-	errInvalidRSAPublicKeyData  = errors.New("utils/rsa: invalid RSA public key")
+	errRSAPrivateKeyData = errors.New("gojwt/rsautils: invalid RSA private key")
+	errRSAPublicKeyData  = errors.New("gojwt/rsautils: invalid RSA public key")
 )
 
 func ParseRSAPrivateKeyFromBytes(data []byte) (*rsa.PrivateKey, error) {
@@ -28,7 +28,7 @@ func ParseRSAPrivateKeyFromBytes(data []byte) (*rsa.PrivateKey, error) {
 
 	privateKey, ok := parsedKey.(*rsa.PrivateKey)
 	if !ok {
-		return nil, errInvalidRSAPrivateKeyData
+		return nil, errRSAPrivateKeyData
 	}
 
 	return privateKey, privateKey.Validate()
@@ -48,7 +48,7 @@ func ParseRSAPublicKeyFromBytes(data []byte) (*rsa.PublicKey, error) {
 
 	publicKey, ok := parsedKey.(*rsa.PublicKey)
 	if !ok {
-		return nil, errInvalidRSAPublicKeyData
+		return nil, errRSAPublicKeyData
 	}
 
 	return publicKey, nil

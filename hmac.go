@@ -1,4 +1,4 @@
-package signer
+package gojwt
 
 import (
 	"crypto"
@@ -9,7 +9,10 @@ import (
 	"fmt"
 )
 
-var errHMACVerification = errors.New("signer/hmac: verification error")
+var (
+	errHMACVerification = errors.New("gojwt/hmac: verification error")
+	errHMACKey          = errors.New("gojwt/hmac: invalid key")
+)
 
 type hmacSigner struct {
 	id   string
@@ -52,10 +55,10 @@ func (s *hmacSigner) Verifier() Verifier {
 
 func newHSSigner(id, name string, hash crypto.Hash, key []byte) (*hmacSigner, error) {
 	if !hash.Available() {
-		return nil, fmt.Errorf("signer/hmac: invalid hash '%v'", hash)
+		return nil, fmt.Errorf("gojwt/hmac: invalid hash '%v'", hash)
 	}
 	if key == nil {
-		return nil, errors.New("signer/hmac: invalid key")
+		return nil, errHMACKey
 	}
 	return &hmacSigner{
 		id:   id,
@@ -94,7 +97,7 @@ func NewHMACSigner(id, name string, key []byte) (Signer, error) {
 	} else if name == "HS512" {
 		return NewHS512Signer(id, key)
 	}
-	return nil, fmt.Errorf("signer/hmac: invalid hmac signer name '%v'", name)
+	return nil, fmt.Errorf("gojwt/hmac: invalid hmac signer name '%v'", name)
 }
 
 func NewHMACVerifier(id, name string, key []byte) (Verifier, error) {
@@ -105,5 +108,5 @@ func NewHMACVerifier(id, name string, key []byte) (Verifier, error) {
 	} else if name == "HS512" {
 		return NewHS512Verifier(id, key)
 	}
-	return nil, fmt.Errorf("signer/hmac: invalid hmac verifier name '%v'", name)
+	return nil, fmt.Errorf("gojwt/hmac: invalid hmac verifier name '%v'", name)
 }
