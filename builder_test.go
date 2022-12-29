@@ -35,7 +35,7 @@ func ivGeneratorForTest(iv []byte) func(int) []byte {
 func createBuilderForTest(name string) *Builder {
 	now := nowForTest
 
-	b := NewBuilder()
+	b := NewBasicBuilder()
 	b.
 		WithIssuer(name).
 		WithSubject(name).
@@ -80,12 +80,12 @@ func splitDataAndSignatureFromJWT(t *testing.T, jwt string) (data, sig []byte, o
 }
 
 func TestBuilder_Empty(t *testing.T) {
-	b := NewBuilder()
+	b := NewBasicBuilder()
 	assertSign(t, b, "eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0.e30.")
 }
 
 func TestBuilder_AddAudience(t *testing.T) {
-	b := NewBuilder()
+	b := NewBasicBuilder()
 
 	b.AddAudience("1")
 	assertSign(t, b, "eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0.eyJhdWRpZW5jZSI6WyIxIl19.")

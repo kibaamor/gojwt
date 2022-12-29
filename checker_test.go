@@ -13,7 +13,7 @@ func assertChecker(t *testing.T, b *Builder, name, want string) {
 	jwt, err := b.Sign()
 	assert.Nil(t, err)
 
-	c := NewChecker(NewBasicToken())
+	c := NewBasicChecker()
 	c.SetTimeFunc(timeFuncForTest)
 	if b.Signer != nil {
 		c.AllowVerifier(b.Signer.Verifier())
@@ -35,7 +35,7 @@ func assertChecker(t *testing.T, b *Builder, name, want string) {
 }
 
 func TestChecker_Empty(t *testing.T) {
-	b := NewBuilder()
+	b := NewBasicBuilder()
 	want := `{"Header":{"alg":"none","typ":"JWT"},"Body":{}}`
 	assertChecker(t, b, "", want)
 }

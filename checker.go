@@ -34,7 +34,11 @@ type Checker struct {
 	TimeFunc  func() time.Time
 }
 
-func NewChecker(token Token) *Checker {
+func NewBasicChecker() *Checker {
+	return NewCheckerWithToken(NewBasicToken())
+}
+
+func NewCheckerWithToken(token Token) *Checker {
 	return &Checker{
 		Token:     token,
 		Verifiers: make(map[string]Verifier),

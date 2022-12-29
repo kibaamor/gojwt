@@ -21,8 +21,8 @@ type Builder struct {
 	IVGenerator func(int) []byte
 }
 
-func NewBuilder() *Builder {
-	return &Builder{Token: NewBasicToken()}
+func NewBasicBuilder() *Builder {
+	return NewBuildWithToken(NewBasicToken())
 }
 
 func NewBuildWithToken(token Token) *Builder {
