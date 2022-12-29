@@ -45,7 +45,8 @@ func TestNewRSASignerAndVerifier(t *testing.T) {
 	t.Parallel()
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			signer := NewRSASigner(tt.id, tt.name, test.RSAPrivateKey)
+			signer, err := NewRSASigner(tt.id, tt.name, test.RSAPrivateKey)
+			assert.Nil(t, err)
 			assert.Equal(t, tt.id, signer.ID())
 			assert.Equal(t, tt.name, signer.Name())
 
@@ -53,7 +54,8 @@ func TestNewRSASignerAndVerifier(t *testing.T) {
 			assert.Equal(t, tt.id, verifier.ID())
 			assert.Equal(t, tt.name, verifier.Name())
 
-			verifier = NewRSAVerifier(tt.id, tt.name, test.RSAPublicKey)
+			verifier, err = NewRSAVerifier(tt.id, tt.name, test.RSAPublicKey)
+			assert.Nil(t, err)
 			assert.Equal(t, tt.id, verifier.ID())
 			assert.Equal(t, tt.name, verifier.Name())
 		})
@@ -101,14 +103,16 @@ func TestRSASignerAndVerifier(t *testing.T) {
 	t.Parallel()
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			signer := NewRSASigner(tt.id, tt.name, test.RSAPrivateKey)
+			signer, err := NewRSASigner(tt.id, tt.name, test.RSAPrivateKey)
+			assert.Nil(t, err)
 
 			data := []byte(tt.name)
 
 			sig, err := signer.Sign(data)
 			assert.Nil(t, err)
 
-			verifier := NewRSAVerifier(tt.id, tt.name, test.RSAPublicKey)
+			verifier, err := NewRSAVerifier(tt.id, tt.name, test.RSAPublicKey)
+			assert.Nil(t, err)
 			err = verifier.Verify(data, sig)
 			assert.Nil(t, err)
 

@@ -43,7 +43,8 @@ func TestNewECDSASignerAndVerifier(t *testing.T) {
 			assert.Nil(t, err)
 			publicKey := &privateKey.PublicKey
 
-			signer := NewECDSASigner(tt.id, tt.name, privateKey)
+			signer, err := NewECDSASigner(tt.id, tt.name, privateKey)
+			assert.Nil(t, err)
 			assert.Equal(t, tt.id, signer.ID())
 			assert.Equal(t, tt.name, signer.Name())
 
@@ -51,7 +52,8 @@ func TestNewECDSASignerAndVerifier(t *testing.T) {
 			assert.Equal(t, tt.id, verifier.ID())
 			assert.Equal(t, tt.name, verifier.Name())
 
-			verifier = NewECDSAVerifier(tt.id, tt.name, publicKey)
+			verifier, err = NewECDSAVerifier(tt.id, tt.name, publicKey)
+			assert.Nil(t, err)
 			assert.Equal(t, tt.id, verifier.ID())
 			assert.Equal(t, tt.name, verifier.Name())
 		})
@@ -88,14 +90,16 @@ func TestECDSASignerAndVerifier(t *testing.T) {
 	t.Parallel()
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			signer := NewECDSASigner(tt.id, tt.name, tt.privateKey)
+			signer, err := NewECDSASigner(tt.id, tt.name, tt.privateKey)
+			assert.Nil(t, err)
 
 			data := []byte(tt.name)
 
 			sig, err := signer.Sign(data)
 			assert.Nil(t, err)
 
-			verifier := NewECDSAVerifier(tt.id, tt.name, tt.publicKey)
+			verifier, err := NewECDSAVerifier(tt.id, tt.name, tt.publicKey)
+			assert.Nil(t, err)
 			err = verifier.Verify(data, sig)
 			assert.Nil(t, err)
 

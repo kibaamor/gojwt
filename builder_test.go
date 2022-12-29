@@ -131,7 +131,8 @@ func TestBuilder_HMAC(t *testing.T) {
 	t.Parallel()
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			s := signer.NewHMACSigner(tt.id, tt.name, []byte(tt.name))
+			s, err := signer.NewHMACSigner(tt.id, tt.name, []byte(tt.name))
+			assert.Nil(t, err)
 			b := createBuilderForTest(tt.name).WithSigner(s)
 
 			jwt, err := b.Sign()
@@ -191,7 +192,8 @@ func TestBuilder_RSA(t *testing.T) {
 	t.Parallel()
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			s := signer.NewRSASigner(tt.id, tt.name, test.RSAPrivateKey)
+			s, err := signer.NewRSASigner(tt.id, tt.name, test.RSAPrivateKey)
+			assert.Nil(t, err)
 			b := createBuilderForTest(tt.name).WithSigner(s)
 
 			jwt, err := b.Sign()
@@ -209,7 +211,8 @@ func TestBuilder_RSA(t *testing.T) {
 			err = v.Verify(data, sig)
 			assert.Nil(t, err)
 
-			v = signer.NewRSAVerifier(tt.id, tt.name, test.RSAPublicKey)
+			v, err = signer.NewRSAVerifier(tt.id, tt.name, test.RSAPublicKey)
+			assert.Nil(t, err)
 			err = v.Verify(data, sig)
 			assert.Nil(t, err)
 		})
@@ -246,7 +249,8 @@ func TestBuilder_ECDSA(t *testing.T) {
 	t.Parallel()
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			s := signer.NewECDSASigner(tt.id, tt.name, tt.privateKey)
+			s, err := signer.NewECDSASigner(tt.id, tt.name, tt.privateKey)
+			assert.Nil(t, err)
 			b := createBuilderForTest(tt.name).WithSigner(s)
 
 			jwt, err := b.Sign()
@@ -261,7 +265,8 @@ func TestBuilder_ECDSA(t *testing.T) {
 			err = v.Verify(data, sig)
 			assert.Nil(t, err)
 
-			v = signer.NewECDSAVerifier(tt.id, tt.name, tt.publicKey)
+			v, err = signer.NewECDSAVerifier(tt.id, tt.name, tt.publicKey)
+			assert.Nil(t, err)
 			err = v.Verify(data, sig)
 			assert.Nil(t, err)
 		})
@@ -300,7 +305,8 @@ func TestBuilder_AESCBC(t *testing.T) {
 	t.Parallel()
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			c := cipher.NewAESCBCCipher(tt.id, []byte(tt.key))
+			c, err := cipher.NewAESCBCCipher(tt.id, []byte(tt.key))
+			assert.Nil(t, err)
 			b := createBuilderForTest(tt.name).WithCipher(c).WithIVGenerator(ivGeneratorForTest(iv))
 
 			jwt, err := b.Sign()

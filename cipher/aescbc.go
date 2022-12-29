@@ -61,15 +61,15 @@ func (c *aesCBCCipher) Decrypt(data, iv []byte) ([]byte, error) {
 	return utils.PKCS7Unpadding(data)
 }
 
-func NewAESCBCCipher(id string, key []byte) Cipher {
+func NewAESCBCCipher(id string, key []byte) (Cipher, error) {
 	block, err := aes.NewCipher(key)
 	if err != nil {
-		panic(fmt.Sprintf("cipher/aescbc: invalid aes key: '%v'", err.Error()))
+		return nil, fmt.Errorf("cipher/aescbc: invalid aes key: '%v'", err.Error())
 	}
 	return &aesCBCCipher{
 		id:      id,
 		name:    fmt.Sprintf("A%dCBC", len(key)*8),
 		keySize: len(key),
 		block:   block,
-	}
+	}, nil
 }

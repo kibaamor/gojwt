@@ -76,7 +76,8 @@ func TestChecker_HMAC(t *testing.T) {
 	t.Parallel()
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			s := signer.NewHMACSigner(tt.id, tt.name, []byte(tt.name))
+			s, err := signer.NewHMACSigner(tt.id, tt.name, []byte(tt.name))
+			assert.Nil(t, err)
 			b := createBuilderForTest(tt.name).WithSigner(s)
 			assertChecker(t, b, tt.name, tt.want)
 		})
@@ -124,7 +125,8 @@ func TestChecker_RSA(t *testing.T) {
 	t.Parallel()
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			s := signer.NewRSASigner(tt.id, tt.name, test.RSAPrivateKey)
+			s, err := signer.NewRSASigner(tt.id, tt.name, test.RSAPrivateKey)
+			assert.Nil(t, err)
 			b := createBuilderForTest(tt.name).WithSigner(s)
 			assertChecker(t, b, tt.name, tt.want)
 		})
@@ -161,7 +163,8 @@ func TestChecker_ECDSA(t *testing.T) {
 	t.Parallel()
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			s := signer.NewECDSASigner(tt.id, tt.name, tt.privateKey)
+			s, err := signer.NewECDSASigner(tt.id, tt.name, tt.privateKey)
+			assert.Nil(t, err)
 			b := createBuilderForTest(tt.name).WithSigner(s)
 			assertChecker(t, b, tt.name, tt.want)
 		})
@@ -200,7 +203,8 @@ func TestChecker_AESCBC(t *testing.T) {
 	t.Parallel()
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			c := cipher.NewAESCBCCipher(tt.id, []byte(tt.key))
+			c, err := cipher.NewAESCBCCipher(tt.id, []byte(tt.key))
+			assert.Nil(t, err)
 			b := createBuilderForTest(tt.name).WithCipher(c).WithIVGenerator(ivGeneratorForTest(iv))
 			assertChecker(t, b, tt.name, tt.want)
 		})
@@ -275,8 +279,10 @@ func TestChecker_HMAC_AESCBC(t *testing.T) {
 	t.Parallel()
 	for _, tt := range tests {
 		t.Run(tt.id, func(t *testing.T) {
-			s := signer.NewHMACSigner(tt.id, tt.hmacName, []byte(tt.hmacName))
-			c := cipher.NewAESCBCCipher(tt.id, []byte(tt.aesCbcKey))
+			s, err := signer.NewHMACSigner(tt.id, tt.hmacName, []byte(tt.hmacName))
+			assert.Nil(t, err)
+			c, err := cipher.NewAESCBCCipher(tt.id, []byte(tt.aesCbcKey))
+			assert.Nil(t, err)
 			b := createBuilderForTest(tt.id).WithSigner(s).WithCipher(c).WithIVGenerator(ivGeneratorForTest(iv))
 			assertChecker(t, b, tt.id, tt.want)
 		})

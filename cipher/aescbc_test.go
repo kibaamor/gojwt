@@ -42,7 +42,8 @@ func TestAESCBCCipher_NameKeySizeIVSize(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			key := utils.RandBytes(tt.keySize)
-			c := NewAESCBCCipher(tt.id, key)
+			c, err := NewAESCBCCipher(tt.id, key)
+			assert.Nil(t, err)
 			assert.Equal(t, tt.id, c.ID())
 			assert.Equal(t, tt.name, c.Name())
 			assert.Equal(t, tt.keySize, c.KeySize())
@@ -110,7 +111,8 @@ func TestAesCBCCipher_EncryptDecrypt(t *testing.T) {
 	t.Parallel()
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			c := NewAESCBCCipher(tt.id, []byte(tt.key))
+			c, err := NewAESCBCCipher(tt.id, []byte(tt.key))
+			assert.Nil(t, err)
 			assert.Equal(t, tt.name, c.Name())
 
 			data := []byte(tt.data)

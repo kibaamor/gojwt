@@ -1,5 +1,14 @@
 SHELL=/bin/bash
 
+all: validate benchmark_tests
+
+##########################
+# Validations            #
+##########################
+
+lint:
+	bash ./build/lint.sh
+
 ##########################
 # Tests                  #
 ##########################
@@ -14,12 +23,5 @@ unit_tests:
 
 benchmark_tests:
 	 bash ./build/benchtests.sh
-
-##########################
-# Validations            #
-##########################
-
-lint:
-	bash ./build/lint.sh
 
 validate: lint unit_tests

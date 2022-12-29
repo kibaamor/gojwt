@@ -82,18 +82,18 @@ func getECDSAKeySize(curveBits int) int {
 	return keySize
 }
 
-func newECDSAVerifierInternal(id, name string, hash crypto.Hash, publicKey *ecdsa.PublicKey, curveBits int, curveName string) Verifier {
+func newECDSAVerifierInternal(id, name string, hash crypto.Hash, publicKey *ecdsa.PublicKey, curveBits int, curveName string) (Verifier, error) {
 	if !hash.Available() {
-		panic(fmt.Sprintf("signer/ecdsa: invalid hash '%v'", hash))
+		return nil, fmt.Errorf("signer/ecdsa: invalid hash '%v'", hash)
 	}
 	if publicKey == nil {
-		panic("signer/ecdsa: invalid public key")
+		return nil, errors.New("signer/ecdsa: invalid public key")
 	}
 	if curveBits != publicKey.Params().BitSize {
-		panic(fmt.Sprintf("signer/ecdsa: invalid bit size. want: %v, got: %v", curveBits, publicKey.Params().BitSize))
+		return nil, fmt.Errorf("signer/ecdsa: invalid bit size. want: %v, got: %v", curveBits, publicKey.Params().BitSize)
 	}
 	if curveName != publicKey.Params().Name {
-		panic(fmt.Sprintf("signer/ecdsa: invalid curve name. want: %v, got: %v", curveName, publicKey.Params().Name))
+		return nil, fmt.Errorf("signer/ecdsa: invalid curve name. want: %v, got: %v", curveName, publicKey.Params().Name)
 	}
 	return &ecdsaVerifier{
 		id:        id,
@@ -101,21 +101,21 @@ func newECDSAVerifierInternal(id, name string, hash crypto.Hash, publicKey *ecds
 		hash:      hash,
 		keySize:   getECDSAKeySize(curveBits),
 		publicKey: publicKey,
-	}
+	}, nil
 }
 
-func newECDSASignerInternal(id, name string, hash crypto.Hash, privateKey *ecdsa.PrivateKey, curveBits int, curveName string) Signer {
+func newECDSASignerInternal(id, name string, hash crypto.Hash, privateKey *ecdsa.PrivateKey, curveBits int, curveName string) (Signer, error) {
 	if !hash.Available() {
-		panic(fmt.Sprintf("signer/ecdsa: invalid hash '%v'", hash))
+		return nil, fmt.Errorf("signer/ecdsa: invalid hash '%v'", hash)
 	}
 	if privateKey == nil {
-		panic("signer/ecdsa: invalid private key")
+		return nil, errors.New("signer/ecdsa: invalid private key")
 	}
 	if curveBits != privateKey.Params().BitSize {
-		panic(fmt.Sprintf("signer/ecdsa: invalid bit size. want: %v, got: %v", curveBits, privateKey.Params().BitSize))
+		return nil, fmt.Errorf("signer/ecdsa: invalid bit size. want: %v, got: %v", curveBits, privateKey.Params().BitSize)
 	}
 	if curveName != privateKey.Params().Name {
-		panic(fmt.Sprintf("signer/ecdsa: invalid curve name. want: %v, got: %v", curveName, privateKey.Params().Name))
+		return nil, fmt.Errorf("signer/ecdsa: invalid curve name. want: %v, got: %v", curveName, privateKey.Params().Name)
 	}
 	return &ecdsaSigner{
 		ecdsaVerifier: ecdsaVerifier{
@@ -126,31 +126,31 @@ func newECDSASignerInternal(id, name string, hash crypto.Hash, privateKey *ecdsa
 			publicKey: &privateKey.PublicKey,
 		},
 		privateKey: privateKey,
-	}
+	}, nil
 }
 
-func NewES256Verifier(id string, publicKey *ecdsa.PublicKey) Verifier {
+func NewES256Verifier(id string, publicKey *ecdsa.PublicKey) (Verifier, error) {
 	return newECDSAVerifierInternal(id, "ES256", crypto.SHA256, publicKey, 256, "P-256")
 }
-func NewES256Signer(id string, privateKey *ecdsa.PrivateKey) Signer {
+func NewES256Signer(id string, privateKey *ecdsa.PrivateKey) (Signer, error) {
 	return newECDSASignerInternal(id, "ES256", crypto.SHA256, privateKey, 256, "P-256")
 }
 
-func NewES384Verifier(id string, publicKey *ecdsa.PublicKey) Verifier {
+func NewES384Verifier(id string, publicKey *ecdsa.PublicKey) (Verifier, error) {
 	return newECDSAVerifierInternal(id, "ES384", crypto.SHA384, publicKey, 384, "P-384")
 }
-func NewES384Signer(id string, privateKey *ecdsa.PrivateKey) Signer {
+func NewES384Signer(id string, privateKey *ecdsa.PrivateKey) (Signer, error) {
 	return newECDSASignerInternal(id, "ES384", crypto.SHA384, privateKey, 384, "P-384")
 }
 
-func NewES512Verifier(id string, publicKey *ecdsa.PublicKey) Verifier {
+func NewES512Verifier(id string, publicKey *ecdsa.PublicKey) (Verifier, error) {
 	return newECDSAVerifierInternal(id, "ES512", crypto.SHA512, publicKey, 521, "P-521")
 }
-func NewES512Signer(id string, privateKey *ecdsa.PrivateKey) Signer {
+func NewES512Signer(id string, privateKey *ecdsa.PrivateKey) (Signer, error) {
 	return newECDSASignerInternal(id, "ES512", crypto.SHA512, privateKey, 521, "P-521")
 }
 
-func NewECDSAVerifier(id, name string, publicKey *ecdsa.PublicKey) Verifier {
+func NewECDSAVerifier(id, name string, publicKey *ecdsa.PublicKey) (Verifier, error) {
 	if name == "ES256" {
 		return NewES256Verifier(id, publicKey)
 	} else if name == "ES384" {
@@ -158,10 +158,10 @@ func NewECDSAVerifier(id, name string, publicKey *ecdsa.PublicKey) Verifier {
 	} else if name == "ES512" {
 		return NewES512Verifier(id, publicKey)
 	}
-	panic(fmt.Sprintf("signer/ecdsa: invalid ecdsa verifier name '%v'", name))
+	return nil, fmt.Errorf("signer/ecdsa: invalid ecdsa verifier name '%v'", name)
 }
 
-func NewECDSASigner(id, name string, privateKey *ecdsa.PrivateKey) Signer {
+func NewECDSASigner(id, name string, privateKey *ecdsa.PrivateKey) (Signer, error) {
 	if name == "ES256" {
 		return NewES256Signer(id, privateKey)
 	} else if name == "ES384" {
@@ -169,5 +169,5 @@ func NewECDSASigner(id, name string, privateKey *ecdsa.PrivateKey) Signer {
 	} else if name == "ES512" {
 		return NewES512Signer(id, privateKey)
 	}
-	panic(fmt.Sprintf("signer/ecdsa: invalid ecdsa verifier name '%v'", name))
+	return nil, fmt.Errorf("signer/ecdsa: invalid ecdsa verifier name '%v'", name)
 }

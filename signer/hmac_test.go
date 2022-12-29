@@ -31,7 +31,8 @@ func TestNewHMACSigner(t *testing.T) {
 	t.Parallel()
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			signer := NewHMACSigner(tt.id, tt.name, []byte(tt.name))
+			signer, err := NewHMACSigner(tt.id, tt.name, []byte(tt.name))
+			assert.Nil(t, err)
 			assert.Equal(t, tt.id, signer.ID())
 			assert.Equal(t, tt.name, signer.Name())
 
@@ -72,7 +73,8 @@ func TestHMACSigner(t *testing.T) {
 	t.Parallel()
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			signer := NewHMACSigner(tt.id, tt.name, []byte(tt.id))
+			signer, err := NewHMACSigner(tt.id, tt.name, []byte(tt.id))
+			assert.Nil(t, err)
 			data := []byte(tt.data)
 
 			sig, err := signer.Sign(data)

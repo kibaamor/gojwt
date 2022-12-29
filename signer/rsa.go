@@ -4,6 +4,7 @@ import (
 	"crypto"
 	"crypto/rand"
 	"crypto/rsa"
+	"errors"
 	"fmt"
 )
 
@@ -66,12 +67,12 @@ func (s *rsaSigner) Verifier() Verifier {
 	return s
 }
 
-func newRSAVerifierInternal(isPSS bool, id, name string, hash crypto.Hash, publicKey *rsa.PublicKey) Verifier {
+func newRSAVerifierInternal(isPSS bool, id, name string, hash crypto.Hash, publicKey *rsa.PublicKey) (Verifier, error) {
 	if !hash.Available() {
-		panic(fmt.Sprintf("signer/rsa: invalid hash '%v'", hash))
+		return nil, fmt.Errorf("signer/rsa: invalid hash '%v'", hash)
 	}
 	if publicKey == nil {
-		panic("signer/rsa: invalid public key")
+		return nil, errors.New("signer/rsa: invalid public key")
 	}
 	return &rsaVerifier{
 		isPSS:     isPSS,
@@ -79,19 +80,19 @@ func newRSAVerifierInternal(isPSS bool, id, name string, hash crypto.Hash, publi
 		name:      name,
 		hash:      hash,
 		publicKey: publicKey,
-	}
+	}, nil
 }
 
-func newRSASignerInternal(isPSS bool, id, name string, hash crypto.Hash, privateKey *rsa.PrivateKey) Signer {
+func newRSASignerInternal(isPSS bool, id, name string, hash crypto.Hash, privateKey *rsa.PrivateKey) (Signer, error) {
 	if !hash.Available() {
-		panic(fmt.Sprintf("signer/rsa: invalid hash '%v'", hash))
+		return nil, fmt.Errorf("signer/rsa: invalid hash '%v'", hash)
 	}
 	if privateKey == nil {
-		panic("signer/rsa: invalid private key")
+		return nil, errors.New("signer/rsa: invalid private key")
 	}
 	err := privateKey.Validate()
 	if err != nil {
-		panic(fmt.Sprintf("signer/rsa: invalid private key: '%v'", err.Error()))
+		return nil, fmt.Errorf("signer/rsa: invalid private key: '%v'", err.Error())
 	}
 	return &rsaSigner{
 		rsaVerifier: rsaVerifier{
@@ -102,52 +103,52 @@ func newRSASignerInternal(isPSS bool, id, name string, hash crypto.Hash, private
 			publicKey: &privateKey.PublicKey,
 		},
 		privateKey: privateKey,
-	}
+	}, nil
 }
 
-func NewRS256Verifier(id string, publicKey *rsa.PublicKey) Verifier {
+func NewRS256Verifier(id string, publicKey *rsa.PublicKey) (Verifier, error) {
 	return newRSAVerifierInternal(false, id, "RS256", crypto.SHA256, publicKey)
 }
-func NewRS256Signer(id string, privateKey *rsa.PrivateKey) Signer {
+func NewRS256Signer(id string, privateKey *rsa.PrivateKey) (Signer, error) {
 	return newRSASignerInternal(false, id, "RS256", crypto.SHA256, privateKey)
 }
 
-func NewRS384Verifier(id string, publicKey *rsa.PublicKey) Verifier {
+func NewRS384Verifier(id string, publicKey *rsa.PublicKey) (Verifier, error) {
 	return newRSAVerifierInternal(false, id, "RS384", crypto.SHA384, publicKey)
 }
-func NewRS384Signer(id string, privateKey *rsa.PrivateKey) Signer {
+func NewRS384Signer(id string, privateKey *rsa.PrivateKey) (Signer, error) {
 	return newRSASignerInternal(false, id, "RS384", crypto.SHA384, privateKey)
 }
 
-func NewRS512Verifier(id string, publicKey *rsa.PublicKey) Verifier {
+func NewRS512Verifier(id string, publicKey *rsa.PublicKey) (Verifier, error) {
 	return newRSAVerifierInternal(false, id, "RS512", crypto.SHA512, publicKey)
 }
-func NewRS512Signer(id string, privateKey *rsa.PrivateKey) Signer {
+func NewRS512Signer(id string, privateKey *rsa.PrivateKey) (Signer, error) {
 	return newRSASignerInternal(false, id, "RS512", crypto.SHA512, privateKey)
 }
 
-func NewPS256Verifier(id string, publicKey *rsa.PublicKey) Verifier {
+func NewPS256Verifier(id string, publicKey *rsa.PublicKey) (Verifier, error) {
 	return newRSAVerifierInternal(true, id, "PS256", crypto.SHA256, publicKey)
 }
-func NewPS256Signer(id string, privateKey *rsa.PrivateKey) Signer {
+func NewPS256Signer(id string, privateKey *rsa.PrivateKey) (Signer, error) {
 	return newRSASignerInternal(true, id, "PS256", crypto.SHA256, privateKey)
 }
 
-func NewPS384Verifier(id string, publicKey *rsa.PublicKey) Verifier {
+func NewPS384Verifier(id string, publicKey *rsa.PublicKey) (Verifier, error) {
 	return newRSAVerifierInternal(true, id, "PS384", crypto.SHA384, publicKey)
 }
-func NewPS384Signer(id string, privateKey *rsa.PrivateKey) Signer {
+func NewPS384Signer(id string, privateKey *rsa.PrivateKey) (Signer, error) {
 	return newRSASignerInternal(true, id, "PS384", crypto.SHA384, privateKey)
 }
 
-func NewPS512Verifier(id string, publicKey *rsa.PublicKey) Verifier {
+func NewPS512Verifier(id string, publicKey *rsa.PublicKey) (Verifier, error) {
 	return newRSAVerifierInternal(true, id, "PS512", crypto.SHA512, publicKey)
 }
-func NewPS512Signer(id string, privateKey *rsa.PrivateKey) Signer {
+func NewPS512Signer(id string, privateKey *rsa.PrivateKey) (Signer, error) {
 	return newRSASignerInternal(true, id, "PS512", crypto.SHA512, privateKey)
 }
 
-func NewRSAVerifier(id string, name string, publicKey *rsa.PublicKey) Verifier {
+func NewRSAVerifier(id string, name string, publicKey *rsa.PublicKey) (Verifier, error) {
 	if name == "RS256" {
 		return NewRS256Verifier(id, publicKey)
 	} else if name == "RS384" {
@@ -161,10 +162,10 @@ func NewRSAVerifier(id string, name string, publicKey *rsa.PublicKey) Verifier {
 	} else if name == "PS512" {
 		return NewPS512Verifier(id, publicKey)
 	}
-	panic(fmt.Sprintf("signer/rsa: invalid rsa verifier name '%v'", name))
+	return nil, fmt.Errorf("signer/rsa: invalid rsa verifier name '%v'", name)
 }
 
-func NewRSASigner(id string, name string, privateKey *rsa.PrivateKey) Signer {
+func NewRSASigner(id string, name string, privateKey *rsa.PrivateKey) (Signer, error) {
 	if name == "RS256" {
 		return NewRS256Signer(id, privateKey)
 	} else if name == "RS384" {
@@ -178,5 +179,5 @@ func NewRSASigner(id string, name string, privateKey *rsa.PrivateKey) Signer {
 	} else if name == "PS512" {
 		return NewPS512Signer(id, privateKey)
 	}
-	panic(fmt.Sprintf("signer/rsa: invalid rsa signer name '%v'", name))
+	return nil, fmt.Errorf("signer/rsa: invalid rsa signer name '%v'", name)
 }

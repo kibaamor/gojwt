@@ -50,32 +50,32 @@ func (s *hmacSigner) Verifier() Verifier {
 	return s
 }
 
-func newHSSigner(id, name string, hash crypto.Hash, key []byte) Signer {
+func newHSSigner(id, name string, hash crypto.Hash, key []byte) (Signer, error) {
 	if !hash.Available() {
-		panic(fmt.Sprintf("signer/hmac: invalid hash '%v'", hash))
+		return nil, fmt.Errorf("signer/hmac: invalid hash '%v'", hash)
 	}
 	if key == nil {
-		panic("signer/hmac: invalid key")
+		return nil, errors.New("signer/hmac: invalid key")
 	}
 	return &hmacSigner{
 		id:   id,
 		name: name,
 		hash: hash,
 		key:  key,
-	}
+	}, nil
 }
 
-func NewHS256Signer(id string, key []byte) Signer {
+func NewHS256Signer(id string, key []byte) (Signer, error) {
 	return newHSSigner(id, "HS256", crypto.SHA256, key)
 }
-func NewHS384Signer(id string, key []byte) Signer {
+func NewHS384Signer(id string, key []byte) (Signer, error) {
 	return newHSSigner(id, "HS384", crypto.SHA384, key)
 }
-func NewHS512Signer(id string, key []byte) Signer {
+func NewHS512Signer(id string, key []byte) (Signer, error) {
 	return newHSSigner(id, "HS512", crypto.SHA512, key)
 }
 
-func NewHMACSigner(id, name string, key []byte) Signer {
+func NewHMACSigner(id, name string, key []byte) (Signer, error) {
 	if name == "HS256" {
 		return NewHS256Signer(id, key)
 	} else if name == "HS384" {
@@ -83,5 +83,5 @@ func NewHMACSigner(id, name string, key []byte) Signer {
 	} else if name == "HS512" {
 		return NewHS512Signer(id, key)
 	}
-	panic(fmt.Sprintf("signer/hmac: invalid hmac verifier name '%v'", name))
+	return nil, fmt.Errorf("signer/hmac: invalid hmac verifier name '%v'", name)
 }
