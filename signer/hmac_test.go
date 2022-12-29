@@ -39,6 +39,11 @@ func TestNewHMACSigner(t *testing.T) {
 			verifier := signer.Verifier()
 			assert.Equal(t, tt.id, verifier.ID())
 			assert.Equal(t, tt.name, verifier.Name())
+
+			verifier, err = NewHMACVerifier(tt.id, tt.name, []byte(tt.name))
+			assert.Nil(t, err)
+			assert.Equal(t, tt.id, verifier.ID())
+			assert.Equal(t, tt.name, verifier.Name())
 		})
 	}
 }
@@ -81,6 +86,11 @@ func TestHMACSigner(t *testing.T) {
 			assert.Nil(t, err)
 
 			verifier := signer.Verifier()
+			err = verifier.Verify(data, sig)
+			assert.Nil(t, err)
+
+			verifier, err = NewHMACVerifier(tt.id, tt.name, []byte(tt.id))
+			assert.Nil(t, err)
 			err = verifier.Verify(data, sig)
 			assert.Nil(t, err)
 
