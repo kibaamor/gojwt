@@ -5,22 +5,15 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"errors"
+	"fmt"
+	"strings"
 	"time"
 
-	utils2 "github.com/kibaamor/gojwt/internal/utils"
+	"github.com/kibaamor/gojwt/internal/utils"
 )
 
 var (
-	errJWT            = errors.New("gojwt/checker: invalid jwt string")
-	errSignerID       = errors.New("gojwt/checker: invalid signer id")
-	errCipherID       = errors.New("gojwt/checker: invalid cipher id")
-	errCipherMismatch = errors.New("gojwt/checker: cipher name mismatch")
-	errExpiresAt      = errors.New("gojwt/checker: invalid token(after ExpiresAt)")
-	errNotBefore      = errors.New("gojwt/checker: invalid token(before NotBefore)")
-	errIssuer         = errors.New("gojwt/checker: invalid issuer")
-	errSubject        = errors.New("gojwt/checker: invalid subject")
-	errAudience       = errors.New("gojwt/checker: invalid audience")
-	errJwtID          = errors.New("gojwt/checker: invalid jwt id")
+	errJWT = errors.New("gojwt/checker: invalid jwt string")
 )
 
 type Checker struct {
@@ -102,7 +95,7 @@ func (c *Checker) Check(jwt string) (*Token, error) {
 		return nil, err
 	}
 
-	bodiesBytes, err := utils2.RawURLDecode(segments[1])
+	bodiesBytes, err := utils.RawURLDecode(segments[1])
 	if err != nil {
 		return nil, err
 	}
@@ -119,12 +112,27 @@ func (c *Checker) Check(jwt string) (*Token, error) {
 }
 
 func (c *Checker) unmarshalHeaders(data []byte) error {
-	data, err := utils2.RawURLDecode(data)
+	data, err := utils.RawURLDecode(data)
 	if err != nil {
 		return err
 	}
 
 	return json.Unmarshal(data, &c.Token.Header)
+}
+
+func (c *Checker) newSignerIDError(sid string) error {
+	b := strings.Builder{}
+	first := true
+	for id := range c.Verifiers {
+		if first {
+			first = false
+		} else {
+			_ = b.WriteByte(',')
+		}
+		_, _ = b.WriteString(id)
+	}
+
+	return fmt.Errorf("gojwt/checker: invalid signer id. got: '%s', want: '%s'", sid, b.String())
 }
 
 func (c *Checker) checkAlgorithm(data, signature []byte) error {
@@ -136,15 +144,30 @@ func (c *Checker) checkAlgorithm(data, signature []byte) error {
 	sid := c.Token.Header.GetSignerID()
 	ve, ok := c.Verifiers[sid]
 	if !ok {
-		return errSignerID
+		return c.newSignerIDError(sid)
 	}
 
 	var err error
-	if signature, err = utils2.RawURLDecode(signature); err != nil {
+	if signature, err = utils.RawURLDecode(signature); err != nil {
 		return err
 	}
 
 	return ve.Verify(data, signature)
+}
+
+func (c *Checker) newCipherIDError(cid string) error {
+	b := strings.Builder{}
+	first := true
+	for id := range c.Ciphers {
+		if first {
+			first = false
+		} else {
+			_ = b.WriteByte(',')
+		}
+		_, _ = b.WriteString(id)
+	}
+
+	return fmt.Errorf("gojwt/checker: invalid cipher id. got: '%s', want: '%s'", cid, b.String())
 }
 
 func (c *Checker) checkEncryptionAndDecrypt(bodiesBytes []byte) ([]byte, error) {
@@ -156,12 +179,13 @@ func (c *Checker) checkEncryptionAndDecrypt(bodiesBytes []byte) ([]byte, error) 
 	cid := c.Token.Header.GetCipherID()
 	ci, ok := c.Ciphers[cid]
 	if !ok {
-		return nil, errCipherID
+		return nil, c.newCipherIDError(cid)
 	}
 
 	enc := c.Token.Header.GetEncryption()
 	if ci.Name() != enc {
-		return nil, errCipherMismatch
+		return nil, fmt.Errorf("gojwt/checker: invalid cipher name. got: '%s', want(%s): '%s'",
+			enc, ci.ID(), ci.Name())
 	}
 
 	ivBase64 := c.Token.Header.GetIV()
@@ -184,22 +208,25 @@ func (c *Checker) checkToken() error {
 
 	if len(c.Issuers) > 0 {
 		issuer := c.Token.Body.GetIssuer()
-		if len(issuer) == 0 || !utils2.Contains(c.Issuers, issuer) {
-			return errIssuer
+		if len(issuer) == 0 || !utils.Contains(c.Issuers, issuer) {
+			return fmt.Errorf("gojwt/checker: invalid issuer. got: '%s', want: '%s'",
+				issuer, strings.Join(c.Issuers, ","))
 		}
 	}
 
 	if len(c.Subjects) > 0 {
 		subject := c.Token.Body.GetSubject()
-		if len(subject) == 0 || !utils2.Contains(c.Subjects, subject) {
-			return errSubject
+		if len(subject) == 0 || !utils.Contains(c.Subjects, subject) {
+			return fmt.Errorf("gojwt/checker: invalid subject. got: '%s', want: '%s'",
+				subject, strings.Join(c.Subjects, ","))
 		}
 	}
 
 	if len(c.JwtIDs) > 0 {
 		jwtID := c.Token.Body.GetJwtID()
-		if len(jwtID) == 0 || !utils2.Contains(c.JwtIDs, jwtID) {
-			return errJwtID
+		if len(jwtID) == 0 || !utils.Contains(c.JwtIDs, jwtID) {
+			return fmt.Errorf("gojwt/checker: invalid jwt id. got: '%s', want: '%s'",
+				jwtID, strings.Join(c.JwtIDs, ","))
 		}
 	}
 
@@ -214,10 +241,12 @@ func (c *Checker) checkTokenTime() error {
 
 	now := timeFunc()
 	if expiresAt := c.Token.Body.GetExpiresAt(); expiresAt != nil && now.After(*expiresAt) {
-		return errExpiresAt
+		return fmt.Errorf("gojwt/checker: invalid token(after ExpiresAt). now: '%s', expiresAt: '%s'",
+			now.String(), expiresAt.String())
 	}
 	if notBefore := c.Token.Body.GetNotBefore(); notBefore != nil && now.Before(*notBefore) {
-		return errNotBefore
+		return fmt.Errorf("gojwt/checker: invalid token(before NotBefore). now: '%s', notBefore: '%s'",
+			now.String(), notBefore.String())
 	}
 	return nil
 }
@@ -229,18 +258,20 @@ func (c *Checker) checkTokenAudience() error {
 
 	audiences := c.Token.Body.GetAudience()
 	if len(audiences) == 0 {
-		return errAudience
+		return fmt.Errorf("gojwt/checker: invalid audience(s). got: '', want: '%s'",
+			strings.Join(c.Audiences, ","))
 	}
 
 	contains := false
 	for _, audience := range audiences {
-		contains = utils2.Contains(c.Audiences, audience)
+		contains = utils.Contains(c.Audiences, audience)
 		if contains {
 			break
 		}
 	}
 	if !contains {
-		return errAudience
+		return fmt.Errorf("gojwt/checker: invalid audience(s). got: '%s', want: '%s'",
+			strings.Join(audiences, ","), strings.Join(c.Audiences, ","))
 	}
 
 	return nil

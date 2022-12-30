@@ -94,10 +94,10 @@ func newECDSAVerifierInternal(id, name string, hash crypto.Hash, publicKey *ecds
 		return nil, errECDSAPublicKey
 	}
 	if curveBits != publicKey.Params().BitSize {
-		return nil, fmt.Errorf("gojwt/ecdsa: invalid bit size. want: %v, got: %v", curveBits, publicKey.Params().BitSize)
+		return nil, fmt.Errorf("gojwt/ecdsa: invalid bit size. want: '%v', got: '%v'", curveBits, publicKey.Params().BitSize)
 	}
 	if curveName != publicKey.Params().Name {
-		return nil, fmt.Errorf("gojwt/ecdsa: invalid curve name. want: %v, got: %v", curveName, publicKey.Params().Name)
+		return nil, fmt.Errorf("gojwt/ecdsa: invalid curve name. want: '%v', got: '%v'", curveName, publicKey.Params().Name)
 	}
 	return &ecdsaVerifier{
 		id:        id,
@@ -116,10 +116,10 @@ func newECDSASignerInternal(id, name string, hash crypto.Hash, privateKey *ecdsa
 		return nil, errECDSAPrivateKey
 	}
 	if curveBits != privateKey.Params().BitSize {
-		return nil, fmt.Errorf("gojwt/ecdsa: invalid bit size. want: %v, got: %v", curveBits, privateKey.Params().BitSize)
+		return nil, fmt.Errorf("gojwt/ecdsa: invalid bit size. want: '%v', got: '%v'", curveBits, privateKey.Params().BitSize)
 	}
 	if curveName != privateKey.Params().Name {
-		return nil, fmt.Errorf("gojwt/ecdsa: invalid curve name. want: %v, got: %v", curveName, privateKey.Params().Name)
+		return nil, fmt.Errorf("gojwt/ecdsa: invalid curve name. want: '%v', got: '%v'", curveName, privateKey.Params().Name)
 	}
 	return &ecdsaSigner{
 		ecdsaVerifier: ecdsaVerifier{

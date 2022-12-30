@@ -4,7 +4,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 
-	utils2 "github.com/kibaamor/gojwt/internal/utils"
+	"github.com/kibaamor/gojwt/internal/utils"
 )
 
 // https://www.rfc-editor.org/rfc/rfc7519.html#page-18
@@ -49,7 +49,7 @@ func (b *Builder) GenerateIV() []byte {
 	if b.IVGenerator != nil {
 		return b.IVGenerator(ivSize)
 	}
-	return utils2.RandBytes(ivSize)
+	return utils.RandBytes(ivSize)
 }
 
 func (b *Builder) Sign() (string, error) {
@@ -116,7 +116,7 @@ func (b *Builder) Sign() (string, error) {
 		return "", err
 	}
 
-	encodedSignature := utils2.RawURLEncode(signature)
+	encodedSignature := utils.RawURLEncode(signature)
 
 	return string(append(jwtWithoutSignature, encodedSignature...)), nil
 }

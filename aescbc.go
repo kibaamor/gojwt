@@ -3,15 +3,9 @@ package gojwt
 import (
 	"crypto/aes"
 	"crypto/cipher"
-	"errors"
 	"fmt"
 
 	"github.com/kibaamor/gojwt/internal/utils"
-)
-
-var (
-	errAESCBCIV   = errors.New("gojwt/aescbc: invalid iv")
-	errAESCBCData = errors.New("gojwt/aescbc: invalid data")
 )
 
 type aesCBCCipher struct {
@@ -39,7 +33,8 @@ func (c *aesCBCCipher) IVSize() int {
 
 func (c *aesCBCCipher) Encrypt(data, iv []byte) ([]byte, error) {
 	if len(iv) != c.block.BlockSize() {
-		return nil, errAESCBCIV
+		return nil, fmt.Errorf("gojwt/aescbc: invalid iv. the length of iv: '%d', block size: '%d'",
+			len(iv), c.block.BlockSize())
 	}
 
 	data = utils.PKCS7Padding(data, c.block.BlockSize())
@@ -50,10 +45,12 @@ func (c *aesCBCCipher) Encrypt(data, iv []byte) ([]byte, error) {
 
 func (c *aesCBCCipher) Decrypt(data, iv []byte) ([]byte, error) {
 	if len(data)%c.block.BlockSize() != 0 {
-		return nil, errAESCBCData
+		return nil, fmt.Errorf("gojwt/aescbc: invalid data. the length of data: '%d', block size: '%d'",
+			len(data), c.block.BlockSize())
 	}
 	if len(iv) != c.block.BlockSize() {
-		return nil, errAESCBCIV
+		return nil, fmt.Errorf("gojwt/aescbc: invalid iv. the length of iv: '%d', block size: '%d'",
+			len(iv), c.block.BlockSize())
 	}
 
 	blockMode := cipher.NewCBCDecrypter(c.block, iv)
