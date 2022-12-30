@@ -97,7 +97,7 @@ func (c *Checker) Check(jwt string) (*Token, error) {
 
 	bodiesBytes, err := utils.RawURLDecode(segments[1])
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("gojwt/checker: decode body failed '%w'", err)
 	}
 	bodiesBytes, err = c.checkEncryptionAndDecrypt(bodiesBytes)
 	if err != nil {
@@ -105,7 +105,7 @@ func (c *Checker) Check(jwt string) (*Token, error) {
 	}
 
 	if err = json.Unmarshal(bodiesBytes, &c.Token.Body); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("gojwt/checker: body is not a valid json '%w'", err)
 	}
 
 	return &c.Token, c.checkToken()
@@ -114,10 +114,15 @@ func (c *Checker) Check(jwt string) (*Token, error) {
 func (c *Checker) unmarshalHeaders(data []byte) error {
 	data, err := utils.RawURLDecode(data)
 	if err != nil {
-		return err
+		return fmt.Errorf("gojwt/checker: decode header failed '%w'", err)
 	}
 
-	return json.Unmarshal(data, &c.Token.Header)
+	err = json.Unmarshal(data, &c.Token.Header)
+	if err != nil {
+		return fmt.Errorf("gojwt/checker: header is not a valid json '%w'", err)
+	}
+
+	return nil
 }
 
 func (c *Checker) newSignerIDError(sid string) error {
@@ -149,7 +154,7 @@ func (c *Checker) checkAlgorithm(data, signature []byte) error {
 
 	var err error
 	if signature, err = utils.RawURLDecode(signature); err != nil {
-		return err
+		return fmt.Errorf("gojwt/checker: decode signature failed '%w'", err)
 	}
 
 	return ve.Verify(data, signature)
@@ -191,7 +196,7 @@ func (c *Checker) checkEncryptionAndDecrypt(bodiesBytes []byte) ([]byte, error) 
 	ivBase64 := c.Token.Header.GetIV()
 	iv, err := base64.RawURLEncoding.DecodeString(ivBase64)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("gojwt/checker: decode iv failed '%w'", err)
 	}
 
 	return ci.Decrypt(bodiesBytes, iv)

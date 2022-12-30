@@ -55,7 +55,11 @@ func (c *aesCBCCipher) Decrypt(data, iv []byte) ([]byte, error) {
 
 	blockMode := cipher.NewCBCDecrypter(c.block, iv)
 	blockMode.CryptBlocks(data, data)
-	return utils.PKCS7Unpadding(data)
+	data, err := utils.PKCS7Unpadding(data)
+	if err != nil {
+		return nil, fmt.Errorf("gojwt/aescbc: pkcs7 unpadding failed '%w'", err)
+	}
+	return data, nil
 }
 
 func NewAESCBCCipher(id string, key []byte) (Cipher, error) {
