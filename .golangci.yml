@@ -68,5 +68,8 @@ linters-settings:
 run:
   timeout: 10m
 
+  skip-dirs:
+    - test/reports
+
   build-tags:
     - test
