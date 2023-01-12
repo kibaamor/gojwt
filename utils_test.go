@@ -1,6 +1,6 @@
 //go:build test || unit
 
-package utils
+package gojwt
 
 import (
 	"testing"

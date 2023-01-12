@@ -3,8 +3,6 @@ package gojwt
 import (
 	"encoding/base64"
 	"encoding/json"
-
-	"github.com/kibaamor/gojwt/internal/utils"
 )
 
 // https://www.rfc-editor.org/rfc/rfc7519.html#page-18
@@ -49,7 +47,7 @@ func (b *Builder) GenerateIV() []byte {
 	if b.IVGenerator != nil {
 		return b.IVGenerator(ivSize)
 	}
-	return utils.RandBytes(ivSize)
+	return RandBytes(ivSize)
 }
 
 func (b *Builder) Sign() (string, error) {
@@ -116,7 +114,7 @@ func (b *Builder) Sign() (string, error) {
 		return "", err
 	}
 
-	encodedSignature := utils.RawURLEncode(signature)
+	encodedSignature := RawURLEncode(signature)
 
 	return string(append(jwtWithoutSignature, encodedSignature...)), nil
 }

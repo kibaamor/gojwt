@@ -4,8 +4,6 @@ import (
 	"crypto/aes"
 	"crypto/cipher"
 	"fmt"
-
-	"github.com/kibaamor/gojwt/internal/utils"
 )
 
 type aesCBCCipher struct {
@@ -37,7 +35,7 @@ func (c *aesCBCCipher) Encrypt(data, iv []byte) ([]byte, error) {
 			len(iv), c.block.BlockSize())
 	}
 
-	data = utils.PKCS7Padding(data, c.block.BlockSize())
+	data = PKCS7Padding(data, c.block.BlockSize())
 	blockMode := cipher.NewCBCEncrypter(c.block, iv)
 	blockMode.CryptBlocks(data, data)
 	return data, nil
@@ -55,7 +53,7 @@ func (c *aesCBCCipher) Decrypt(data, iv []byte) ([]byte, error) {
 
 	blockMode := cipher.NewCBCDecrypter(c.block, iv)
 	blockMode.CryptBlocks(data, data)
-	data, err := utils.PKCS7Unpadding(data)
+	data, err := PKCS7Unpadding(data)
 	if err != nil {
 		return nil, fmt.Errorf("gojwt/aescbc: pkcs7 unpadding failed '%w'", err)
 	}

@@ -6,8 +6,6 @@ import (
 	"encoding/base64"
 	"testing"
 
-	"github.com/kibaamor/gojwt/internal/utils"
-
 	"github.com/stretchr/testify/assert"
 )
 
@@ -41,7 +39,7 @@ func TestAESCBCCipher_NameKeySizeIVSize(t *testing.T) {
 	t.Parallel()
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			key := utils.RandBytes(tt.keySize)
+			key := RandBytes(tt.keySize)
 			c, err := NewAESCBCCipher(tt.id, key)
 			assert.Nil(t, err)
 			assert.Equal(t, tt.id, c.ID())

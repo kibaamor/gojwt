@@ -2,8 +2,6 @@ package gojwt
 
 import (
 	"time"
-
-	"github.com/kibaamor/gojwt/internal/utils"
 )
 
 type BodyInterface interface {
@@ -64,7 +62,7 @@ func (b *BasicBody) GetAudience() []string {
 }
 
 func (b *BasicBody) AddAudience(s string) {
-	if !utils.Contains(b.Audience, s) {
+	if !Contains(b.Audience, s) {
 		b.Audience = append(b.Audience, s)
 	}
 }

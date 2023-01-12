@@ -1,27 +1,26 @@
 SHELL=/bin/bash
 
-all: validate benchmark_tests
+all: lint unit_tests benchmark_tests
 
 ##########################
 # Validations            #
 ##########################
 
 lint:
-	bash ./build/lint.sh
+	bash ./scripts/lint.sh
 
 ##########################
 # Tests                  #
 ##########################
 
 unit_tests:
-	@echo "Execute unit tests..."
-	bash ./build/unittests.sh $(VERBOSE)
+	bash ./scripts/unittests.sh $(VERBOSE)
 
 ##########################
 # Benchmark              #
 ##########################
 
 benchmark_tests:
-	 bash ./build/benchtests.sh
+	 bash ./scripts/benchtests.sh
 
-validate: lint unit_tests
+.PHONY: all lint unit_tests benchmark_tests

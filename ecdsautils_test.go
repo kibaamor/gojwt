@@ -13,8 +13,6 @@ import (
 	"os"
 	"testing"
 
-	"github.com/kibaamor/gojwt/internal/utils"
-
 	"github.com/stretchr/testify/assert"
 )
 
@@ -320,7 +318,7 @@ func TestParseECDSAPrivateKeyFromPemBytesOrFile(t *testing.T) {
 			)
 			if tt.isFile {
 				var filename string
-				filename, err = utils.WriteToTempFile("", "ecdsa_test", data)
+				filename, err = WriteToTempFile("", "ecdsa_test", data)
 				assert.Nil(t, err)
 				parsedPrivateKey, err = ParseECDSAPrivateKeyFromPemFile(filename)
 				_ = os.Remove(filename)
@@ -384,7 +382,7 @@ func TestParseECDSAPublicKeyFromPemBytesOrFile(t *testing.T) {
 			)
 			if tt.isFile {
 				var filename string
-				filename, err = utils.WriteToTempFile("", "ecdsa_test", data)
+				filename, err = WriteToTempFile("", "ecdsa_test", data)
 				assert.Nil(t, err)
 				parsedPublicKey, err = ParseECDSAPublicKeyFromPemFile(filename)
 				_ = os.Remove(filename)

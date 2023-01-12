@@ -8,8 +8,6 @@ import (
 	"fmt"
 	"strings"
 	"time"
-
-	"github.com/kibaamor/gojwt/internal/utils"
 )
 
 var (
@@ -95,7 +93,7 @@ func (c *Checker) Check(jwt string) (*Token, error) {
 		return nil, err
 	}
 
-	bodiesBytes, err := utils.RawURLDecode(segments[1])
+	bodiesBytes, err := RawURLDecode(segments[1])
 	if err != nil {
 		return nil, fmt.Errorf("gojwt/checker: decode body failed '%w'", err)
 	}
@@ -112,7 +110,7 @@ func (c *Checker) Check(jwt string) (*Token, error) {
 }
 
 func (c *Checker) unmarshalHeaders(data []byte) error {
-	data, err := utils.RawURLDecode(data)
+	data, err := RawURLDecode(data)
 	if err != nil {
 		return fmt.Errorf("gojwt/checker: decode header failed '%w'", err)
 	}
@@ -153,7 +151,7 @@ func (c *Checker) checkAlgorithm(data, signature []byte) error {
 	}
 
 	var err error
-	if signature, err = utils.RawURLDecode(signature); err != nil {
+	if signature, err = RawURLDecode(signature); err != nil {
 		return fmt.Errorf("gojwt/checker: decode signature failed '%w'", err)
 	}
 
@@ -213,7 +211,7 @@ func (c *Checker) checkToken() error {
 
 	if len(c.Issuers) > 0 {
 		issuer := c.Token.Body.GetIssuer()
-		if len(issuer) == 0 || !utils.Contains(c.Issuers, issuer) {
+		if len(issuer) == 0 || !Contains(c.Issuers, issuer) {
 			return fmt.Errorf("gojwt/checker: invalid issuer. got: '%s', want: '%s'",
 				issuer, strings.Join(c.Issuers, ","))
 		}
@@ -221,7 +219,7 @@ func (c *Checker) checkToken() error {
 
 	if len(c.Subjects) > 0 {
 		subject := c.Token.Body.GetSubject()
-		if len(subject) == 0 || !utils.Contains(c.Subjects, subject) {
+		if len(subject) == 0 || !Contains(c.Subjects, subject) {
 			return fmt.Errorf("gojwt/checker: invalid subject. got: '%s', want: '%s'",
 				subject, strings.Join(c.Subjects, ","))
 		}
@@ -229,7 +227,7 @@ func (c *Checker) checkToken() error {
 
 	if len(c.JwtIDs) > 0 {
 		jwtID := c.Token.Body.GetJwtID()
-		if len(jwtID) == 0 || !utils.Contains(c.JwtIDs, jwtID) {
+		if len(jwtID) == 0 || !Contains(c.JwtIDs, jwtID) {
 			return fmt.Errorf("gojwt/checker: invalid jwt id. got: '%s', want: '%s'",
 				jwtID, strings.Join(c.JwtIDs, ","))
 		}
@@ -269,7 +267,7 @@ func (c *Checker) checkTokenAudience() error {
 
 	contains := false
 	for _, audience := range audiences {
-		contains = utils.Contains(c.Audiences, audience)
+		contains = Contains(c.Audiences, audience)
 		if contains {
 			break
 		}
