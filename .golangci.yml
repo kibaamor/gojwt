@@ -3,16 +3,22 @@
 # List of available linters: https://golangci-lint.run/usage/linters/
 linters:
   enable:
-    - bodyclose
-    - durationcheck
-    - goconst
-    - gocritic
-    - misspell
-    - nilerr
-    - revive
-    - whitespace
-    - unconvert
-    - goimports
+    - bodyclose # Checks whether HTTP response body is closed successfully.
+    - durationcheck # Check for two durations multiplied together.
+    - goconst # Finds repeated strings that could be replaced by a constant.
+    - gocritic # Provides diagnostics that check for bugs, performance and style issues.
+    - gocheckcompilerdirectives # Checks that go compiler directive comments (//go:) are valid.
+    - misspell # Finds commonly misspelled English words.
+    - nilerr # Finds the code that returns nil even if it checks that the error is not nil.
+    - revive # Fast, configurable, extensible, flexible, and beautiful linter for Go. Drop-in replacement of golint.
+    - whitespace # Whitespace is a linter that checks for unnecessary newlines at the start and end of functions, if, for, etc.
+    - unconvert # Remove unnecessary type conversions.
+    - goimports # Check import statements are formatted according to the 'goimport' command.
+    - nonamedreturns # Reports all named returns.
+    - mirror # Reports wrong mirror patterns of bytes/strings usage.
+    - godox # Tool for detection of FIXME, TODO and other comment keywords.
+    - usestdlibvars # A linter that detect the possibility to use variables/constants from the Go standard library.
+    - testifylint # Checks usage of github.com/stretchr/testify.
 
 linters-settings:
   goimports:
@@ -39,7 +45,9 @@ linters-settings:
       - name: cognitive-complexity
         arguments: [21]
       - name: unhandled-error
-        arguments: ["os.Setenv", "fmt.Fprintf", "fmt.Print", "fmt.Println"]
+        arguments: ["os.Setenv", "fmt.Fprintf", "fmt.Print", "fmt.Println", "fmt.Printf"]
+      - name: max-control-nesting
+        arguments: [6]
 
       # Disabled
       - name: max-public-structs
@@ -64,12 +72,15 @@ linters-settings:
         disabled: true
       - name: nested-structs
         disabled: true
+      - name: import-shadowing
+        disabled: true
+
+issues:
+  exclude-dirs:
+    - test/reports
 
 run:
   timeout: 10m
-
-  skip-dirs:
-    - test/reports
 
   build-tags:
     - test

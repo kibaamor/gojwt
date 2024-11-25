@@ -6,7 +6,7 @@ import (
 	"encoding/base64"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestNewHMACSigner(t *testing.T) {
@@ -29,21 +29,25 @@ func TestNewHMACSigner(t *testing.T) {
 	}
 
 	t.Parallel()
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			require := require.New(t)
+
 			signer, err := NewHMACSigner(tt.id, tt.name, []byte(tt.name))
-			assert.Nil(t, err)
-			assert.Equal(t, tt.id, signer.ID())
-			assert.Equal(t, tt.name, signer.Name())
+			require.NoError(err)
+			require.Equal(tt.id, signer.ID())
+			require.Equal(tt.name, signer.Name())
 
 			verifier := signer.Verifier()
-			assert.Equal(t, tt.id, verifier.ID())
-			assert.Equal(t, tt.name, verifier.Name())
+			require.Equal(tt.id, verifier.ID())
+			require.Equal(tt.name, verifier.Name())
 
 			verifier, err = NewHMACVerifier(tt.id, tt.name, []byte(tt.name))
-			assert.Nil(t, err)
-			assert.Equal(t, tt.id, verifier.ID())
-			assert.Equal(t, tt.name, verifier.Name())
+			require.NoError(err)
+			require.Equal(tt.id, verifier.ID())
+			require.Equal(tt.name, verifier.Name())
 		})
 	}
 }
@@ -76,26 +80,30 @@ func TestHMACSigner(t *testing.T) {
 	}
 
 	t.Parallel()
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			require := require.New(t)
+
 			signer, err := NewHMACSigner(tt.id, tt.name, []byte(tt.id))
-			assert.Nil(t, err)
+			require.NoError(err)
 			data := []byte(tt.data)
 
 			sig, err := signer.Sign(data)
-			assert.Nil(t, err)
+			require.NoError(err)
 
 			verifier := signer.Verifier()
 			err = verifier.Verify(data, sig)
-			assert.Nil(t, err)
+			require.NoError(err)
 
 			verifier, err = NewHMACVerifier(tt.id, tt.name, []byte(tt.id))
-			assert.Nil(t, err)
+			require.NoError(err)
 			err = verifier.Verify(data, sig)
-			assert.Nil(t, err)
+			require.NoError(err)
 
 			got := base64.StdEncoding.EncodeToString(sig)
-			assert.Equal(t, tt.want, got)
+			require.Equal(tt.want, got)
 		})
 	}
 }

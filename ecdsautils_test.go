@@ -13,16 +13,16 @@ import (
 	"os"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
-func genECDSAKeyBytes(curve elliptic.Curve, isPrivate, privateIsPKCS, pemEncoded bool) (privateKey *ecdsa.PrivateKey, data []byte) {
-	var err error
-
-	privateKey, err = ecdsa.GenerateKey(curve, rand.Reader)
+func genECDSAKeyBytes(curve elliptic.Curve, isPrivate, privateIsPKCS, pemEncoded bool) (*ecdsa.PrivateKey, []byte) {
+	privateKey, err := ecdsa.GenerateKey(curve, rand.Reader)
 	if err != nil {
 		panic(err)
 	}
+
+	var data []byte
 
 	if isPrivate {
 		if privateIsPKCS {
@@ -146,8 +146,12 @@ func TestParseECDSAPrivateKeyFromBytesOrBase64(t *testing.T) {
 	}
 
 	t.Parallel()
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			require := require.New(t)
+
 			privateKey, data := genECDSAKeyBytes(tt.curve, true, tt.privateIsPKCS, false)
 
 			var (
@@ -160,8 +164,8 @@ func TestParseECDSAPrivateKeyFromBytesOrBase64(t *testing.T) {
 				parsedPrivateKey, err = ParseECDSAPrivateKeyFromBytes(data)
 			}
 
-			assert.Nil(t, err)
-			assert.True(t, privateKey.Equal(parsedPrivateKey), "private key parsed failed")
+			require.NoError(err)
+			require.True(privateKey.Equal(parsedPrivateKey), "private key parsed failed")
 		})
 	}
 }
@@ -205,8 +209,12 @@ func TestParseECDSAPublicKeyFromBytesOrBase64(t *testing.T) {
 	}
 
 	t.Parallel()
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			require := require.New(t)
+
 			privateKey, data := genECDSAKeyBytes(tt.curve, false, false, false)
 			publicKey := &privateKey.PublicKey
 
@@ -220,8 +228,8 @@ func TestParseECDSAPublicKeyFromBytesOrBase64(t *testing.T) {
 				parsedPublicKey, err = ParseECDSAPublicKeyFromBytes(data)
 			}
 
-			assert.Nil(t, err)
-			assert.True(t, publicKey.Equal(parsedPublicKey), "public key parsed failed")
+			require.NoError(err)
+			require.True(publicKey.Equal(parsedPublicKey), "public key parsed failed")
 		})
 	}
 }
@@ -308,8 +316,12 @@ func TestParseECDSAPrivateKeyFromPemBytesOrFile(t *testing.T) {
 	}
 
 	t.Parallel()
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			require := require.New(t)
+
 			privateKey, data := genECDSAKeyBytes(tt.curve, true, tt.privateIsPKCS, true)
 
 			var (
@@ -319,15 +331,15 @@ func TestParseECDSAPrivateKeyFromPemBytesOrFile(t *testing.T) {
 			if tt.isFile {
 				var filename string
 				filename, err = WriteToTempFile("", "ecdsa_test", data)
-				assert.Nil(t, err)
+				require.NoError(err)
 				parsedPrivateKey, err = ParseECDSAPrivateKeyFromPemFile(filename)
 				_ = os.Remove(filename)
 			} else {
 				parsedPrivateKey, err = ParseECDSAPrivateKeyFromPemBytes(data)
 			}
 
-			assert.Nil(t, err)
-			assert.True(t, privateKey.Equal(parsedPrivateKey), "private key parsed failed")
+			require.NoError(err)
+			require.True(privateKey.Equal(parsedPrivateKey), "private key parsed failed")
 		})
 	}
 }
@@ -371,8 +383,12 @@ func TestParseECDSAPublicKeyFromPemBytesOrFile(t *testing.T) {
 	}
 
 	t.Parallel()
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			require := require.New(t)
+
 			privateKey, data := genECDSAKeyBytes(tt.curve, false, false, true)
 			publicKey := &privateKey.PublicKey
 
@@ -383,15 +399,15 @@ func TestParseECDSAPublicKeyFromPemBytesOrFile(t *testing.T) {
 			if tt.isFile {
 				var filename string
 				filename, err = WriteToTempFile("", "ecdsa_test", data)
-				assert.Nil(t, err)
+				require.NoError(err)
 				parsedPublicKey, err = ParseECDSAPublicKeyFromPemFile(filename)
 				_ = os.Remove(filename)
 			} else {
 				parsedPublicKey, err = ParseECDSAPublicKeyFromPemBytes(data)
 			}
 
-			assert.Nil(t, err)
-			assert.True(t, publicKey.Equal(parsedPublicKey), "public key parsed failed")
+			require.NoError(err)
+			require.True(publicKey.Equal(parsedPublicKey), "public key parsed failed")
 		})
 	}
 }

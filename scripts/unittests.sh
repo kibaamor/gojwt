@@ -1,6 +1,7 @@
 #!/bin/bash
 
-CUR_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+CUR_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
+# shellcheck disable=SC1091
 source "${CUR_DIR}"/commons.sh
 
 # $1: Enable verbose mode
@@ -10,7 +11,10 @@ if [ -n "$VERBOSE" ]; then
 fi
 
 echo "Execute unit tests..."
-( set -x; env CGO_ENABLED=0 go test ${VERBOSE} -coverprofile=test/reports/coverage_unit.out -tags=unit ./... )
+(
+    set -x
+    env CGO_ENABLED=0 go test "${VERBOSE}" -coverprofile=test/reports/coverage_unit.out -tags=unit ./...
+)
 error=$?
 if [ "$error" -ne "0" ]; then
     echo -e "${LIGHTRED}ERROR: Execute unit tests: ${error}${NC}"
@@ -20,10 +24,13 @@ else
 fi
 
 echo "Generate coverage report..."
-( set -x; go tool cover -html=test/reports/coverage_unit.out -o test/reports/coverage_unit.html )
+(
+    set -x
+    go tool cover -html=test/reports/coverage_unit.out -o test/reports/coverage_unit.html
+)
 error=$?
 if [ "$error" -ne "0" ]; then
     echo -e "${LIGHTRED}ERROR: Generate coverage report: ${error}${NC}"
 fi
 
-exit_shell ${exit_shell}
+exit_shell "${exit_shell}"

@@ -9,7 +9,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 var nowForTest time.Time
@@ -50,41 +50,40 @@ func createBuilderForTest(name string) *Builder {
 }
 
 func assertSign(t *testing.T, b *Builder, signature string) {
+	require := require.New(t)
+
 	sig, err := b.Sign()
-	assert.Nil(t, err)
-	assert.Equal(t, signature, sig)
+	require.NoError(err)
+	require.Equal(signature, sig)
 }
 
-func splitDataAndSignatureFromJWT(t *testing.T, jwt string) (data, sig []byte, ok bool) {
+func splitDataAndSignatureFromJWT(t *testing.T, jwt string) ([]byte, []byte) {
+	require := require.New(t)
+
 	segments := strings.SplitN(jwt, ".", 3)
-	if !assert.Equal(t, 3, len(segments)) {
-		return data, sig, ok
-	}
+	require.Len(segments, 3)
 
 	if len(segments[2]) == 0 {
-		data = []byte(jwt[:len(jwt)-1])
-		sig = []byte{}
-		ok = true
-		return data, sig, ok
+		return []byte(jwt[:len(jwt)-1]), nil
 	}
 
-	var err error
-	sig, err = base64.RawURLEncoding.DecodeString(segments[2])
-	if !assert.Nil(t, err) {
-		return data, sig, ok
-	}
+	sig, err := base64.RawURLEncoding.DecodeString(segments[2])
+	require.NoError(err)
 
-	data = []byte(jwt[:len(jwt)-len(segments[2])-1])
-	ok = true
-	return data, sig, ok
+	data := []byte(jwt[:len(jwt)-len(segments[2])-1])
+	return data, sig
 }
 
 func TestBuilder_Empty(t *testing.T) {
+	t.Parallel()
+
 	b := NewBasicBuilder()
 	assertSign(t, b, "eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0.e30.")
 }
 
 func TestBuilder_AddAudience(t *testing.T) {
+	t.Parallel()
+
 	b := NewBasicBuilder()
 
 	b.AddAudience("1")
@@ -95,6 +94,8 @@ func TestBuilder_AddAudience(t *testing.T) {
 }
 
 func TestBuilder_FullReservedClaims(t *testing.T) {
+	t.Parallel()
+
 	b := createBuilderForTest("test")
 	assertSign(t, b, "eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0.eyJqdGkiOiJ0ZXN0IiwiaXNzdWVyIjoidGVzdCIsInN1YmplY3QiOiJ0ZXN0IiwiYXVkaWVuY2UiOlsidGVzdCIsInRlc3R0ZXN0Il0sImV4cCI6MTEzNjIxNzg0NSwibmJmIjoxMTM2MjE0MjQ1LCJpYXQiOjExMzYyMTQyNDV9.")
 }
@@ -123,24 +124,24 @@ func TestBuilder_HMAC(t *testing.T) {
 	}
 
 	t.Parallel()
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			require := require.New(t)
+
 			s, err := NewHMACSigner(tt.id, tt.name, []byte(tt.name))
-			assert.Nil(t, err)
+			require.NoError(err)
 			b := createBuilderForTest(tt.name).WithSigner(s)
 
 			jwt, err := b.Sign()
-			assert.Nil(t, err)
-			assert.Equal(t, tt.want, jwt)
+			require.NoError(err)
+			require.Equal(tt.want, jwt)
 
-			data, sig, ok := splitDataAndSignatureFromJWT(t, jwt)
-			if !ok {
-				return
-			}
-
+			data, sig := splitDataAndSignatureFromJWT(t, jwt)
 			v := s.Verifier()
 			err = v.Verify(data, sig)
-			assert.Nil(t, err)
+			require.NoError(err)
 		})
 	}
 }
@@ -184,31 +185,31 @@ func TestBuilder_RSA(t *testing.T) {
 	}
 
 	t.Parallel()
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			require := require.New(t)
+
 			s, err := NewRSASigner(tt.id, tt.name, rsaPrivateKeyForTest)
-			assert.Nil(t, err)
+			require.NoError(err)
 			b := createBuilderForTest(tt.name).WithSigner(s)
 
 			jwt, err := b.Sign()
-			assert.Nil(t, err)
+			require.NoError(err)
 			if len(tt.want) > 0 {
-				assert.Equal(t, tt.want, jwt)
+				require.Equal(tt.want, jwt)
 			}
 
-			data, sig, ok := splitDataAndSignatureFromJWT(t, jwt)
-			if !ok {
-				return
-			}
-
+			data, sig := splitDataAndSignatureFromJWT(t, jwt)
 			v := s.Verifier()
 			err = v.Verify(data, sig)
-			assert.Nil(t, err)
+			require.NoError(err)
 
 			v, err = NewRSAVerifier(tt.id, tt.name, rsaPublicKeyForTest)
-			assert.Nil(t, err)
+			require.NoError(err)
 			err = v.Verify(data, sig)
-			assert.Nil(t, err)
+			require.NoError(err)
 		})
 	}
 }
@@ -241,28 +242,28 @@ func TestBuilder_ECDSA(t *testing.T) {
 	}
 
 	t.Parallel()
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			require := require.New(t)
+
 			s, err := NewECDSASigner(tt.id, tt.name, tt.privateKey)
-			assert.Nil(t, err)
+			require.NoError(err)
 			b := createBuilderForTest(tt.name).WithSigner(s)
 
 			jwt, err := b.Sign()
-			assert.Nil(t, err)
+			require.NoError(err)
 
-			data, sig, ok := splitDataAndSignatureFromJWT(t, jwt)
-			if !ok {
-				return
-			}
-
+			data, sig := splitDataAndSignatureFromJWT(t, jwt)
 			v := s.Verifier()
 			err = v.Verify(data, sig)
-			assert.Nil(t, err)
+			require.NoError(err)
 
 			v, err = NewECDSAVerifier(tt.id, tt.name, tt.publicKey)
-			assert.Nil(t, err)
+			require.NoError(err)
 			err = v.Verify(data, sig)
-			assert.Nil(t, err)
+			require.NoError(err)
 		})
 	}
 }
@@ -297,15 +298,19 @@ func TestBuilder_AESCBC(t *testing.T) {
 	iv := []byte("4kibazen4kibazen")
 
 	t.Parallel()
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			require := require.New(t)
+
 			c, err := NewAESCBCCipher(tt.id, []byte(tt.key))
-			assert.Nil(t, err)
+			require.NoError(err)
 			b := createBuilderForTest(tt.name).WithCipher(c).WithIVGenerator(ivGeneratorForTest(iv))
 
 			jwt, err := b.Sign()
-			assert.Nil(t, err)
-			assert.Equal(t, tt.want, jwt)
+			require.NoError(err)
+			require.Equal(tt.want, jwt)
 		})
 	}
 }
@@ -321,6 +326,8 @@ type customBody struct {
 }
 
 func TestBuilder_CustomToken(t *testing.T) {
+	t.Parallel()
+
 	b := NewBuildWithToken(Token{
 		Header: &customHeader{
 			CustomHeaderField: "custom header value",

@@ -70,9 +70,8 @@ func RandBytes(n int) []byte {
 	return bs
 }
 
-func WriteToTempFile(dir, pattern string, data []byte) (filename string, err error) {
-	var f *os.File
-	f, err = os.CreateTemp(dir, pattern)
+func WriteToTempFile(dir, pattern string, data []byte) (string, error) {
+	f, err := os.CreateTemp(dir, pattern)
 	if err != nil {
 		return "", err
 	}
@@ -82,7 +81,7 @@ func WriteToTempFile(dir, pattern string, data []byte) (filename string, err err
 		return "", err
 	}
 
-	filename = f.Name()
+	filename := f.Name()
 
 	err = f.Close()
 	if err != nil {

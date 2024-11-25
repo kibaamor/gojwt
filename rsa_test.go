@@ -6,7 +6,7 @@ import (
 	"encoding/base64"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestNewRSASignerAndVerifier(t *testing.T) {
@@ -41,21 +41,25 @@ func TestNewRSASignerAndVerifier(t *testing.T) {
 	}
 
 	t.Parallel()
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			require := require.New(t)
+
 			signer, err := NewRSASigner(tt.id, tt.name, rsaPrivateKeyForTest)
-			assert.Nil(t, err)
-			assert.Equal(t, tt.id, signer.ID())
-			assert.Equal(t, tt.name, signer.Name())
+			require.NoError(err)
+			require.Equal(tt.id, signer.ID())
+			require.Equal(tt.name, signer.Name())
 
 			verifier := signer.Verifier()
-			assert.Equal(t, tt.id, verifier.ID())
-			assert.Equal(t, tt.name, verifier.Name())
+			require.Equal(tt.id, verifier.ID())
+			require.Equal(tt.name, verifier.Name())
 
 			verifier, err = NewRSAVerifier(tt.id, tt.name, rsaPublicKeyForTest)
-			assert.Nil(t, err)
-			assert.Equal(t, tt.id, verifier.ID())
-			assert.Equal(t, tt.name, verifier.Name())
+			require.NoError(err)
+			require.Equal(tt.id, verifier.ID())
+			require.Equal(tt.name, verifier.Name())
 		})
 	}
 }
@@ -99,28 +103,32 @@ func TestRSASignerAndVerifier(t *testing.T) {
 	}
 
 	t.Parallel()
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			require := require.New(t)
+
 			signer, err := NewRSASigner(tt.id, tt.name, rsaPrivateKeyForTest)
-			assert.Nil(t, err)
+			require.NoError(err)
 
 			data := []byte(tt.name)
 
 			sig, err := signer.Sign(data)
-			assert.Nil(t, err)
+			require.NoError(err)
 
 			verifier, err := NewRSAVerifier(tt.id, tt.name, rsaPublicKeyForTest)
-			assert.Nil(t, err)
+			require.NoError(err)
 			err = verifier.Verify(data, sig)
-			assert.Nil(t, err)
+			require.NoError(err)
 
 			verifier = signer.Verifier()
 			err = verifier.Verify(data, sig)
-			assert.Nil(t, err)
+			require.NoError(err)
 
 			if len(tt.want) > 0 {
 				got := base64.StdEncoding.EncodeToString(sig)
-				assert.Equal(t, tt.want, got)
+				require.Equal(tt.want, got)
 			}
 		})
 	}

@@ -6,12 +6,14 @@ import (
 	"crypto/ecdsa"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func assertChecker(t *testing.T, b *Builder, name, want string) {
+	require := require.New(t)
+
 	jwt, err := b.Sign()
-	assert.Nil(t, err)
+	require.NoError(err)
 
 	c := NewBasicChecker()
 	c.SetTimeFunc(timeFuncForTest)
@@ -30,17 +32,21 @@ func assertChecker(t *testing.T, b *Builder, name, want string) {
 	}
 
 	got, err := c.Check(jwt)
-	assert.Nil(t, err)
-	assert.Equal(t, want, got.String())
+	require.NoError(err)
+	require.Equal(want, got.String())
 }
 
 func TestChecker_Empty(t *testing.T) {
+	t.Parallel()
+
 	b := NewBasicBuilder()
 	want := `{"Header":{"alg":"none","typ":"JWT"},"Body":{}}`
 	assertChecker(t, b, "", want)
 }
 
 func TestChecker_FullReservedClaims(t *testing.T) {
+	t.Parallel()
+
 	b := createBuilderForTest("test")
 	want := `{"Header":{"alg":"none","typ":"JWT"},"Body":{"jti":"test","issuer":"test","subject":"test","audience":["test","testtest"],"exp":1136217845,"nbf":1136214245,"iat":1136214245}}`
 	assertChecker(t, b, "test", want)
@@ -70,10 +76,14 @@ func TestChecker_HMAC(t *testing.T) {
 	}
 
 	t.Parallel()
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			require := require.New(t)
+
 			s, err := NewHMACSigner(tt.id, tt.name, []byte(tt.name))
-			assert.Nil(t, err)
+			require.NoError(err)
 			b := createBuilderForTest(tt.name).WithSigner(s)
 			assertChecker(t, b, tt.name, tt.want)
 		})
@@ -119,10 +129,14 @@ func TestChecker_RSA(t *testing.T) {
 	}
 
 	t.Parallel()
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			require := require.New(t)
+
 			s, err := NewRSASigner(tt.id, tt.name, rsaPrivateKeyForTest)
-			assert.Nil(t, err)
+			require.NoError(err)
 			b := createBuilderForTest(tt.name).WithSigner(s)
 			assertChecker(t, b, tt.name, tt.want)
 		})
@@ -157,10 +171,14 @@ func TestChecker_ECDSA(t *testing.T) {
 	}
 
 	t.Parallel()
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			require := require.New(t)
+
 			s, err := NewECDSASigner(tt.id, tt.name, tt.privateKey)
-			assert.Nil(t, err)
+			require.NoError(err)
 			b := createBuilderForTest(tt.name).WithSigner(s)
 			assertChecker(t, b, tt.name, tt.want)
 		})
@@ -197,10 +215,14 @@ func TestChecker_AESCBC(t *testing.T) {
 	iv := []byte("4kibazen4kibazen")
 
 	t.Parallel()
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			require := require.New(t)
+
 			c, err := NewAESCBCCipher(tt.id, []byte(tt.key))
-			assert.Nil(t, err)
+			require.NoError(err)
 			b := createBuilderForTest(tt.name).WithCipher(c).WithIVGenerator(ivGeneratorForTest(iv))
 			assertChecker(t, b, tt.name, tt.want)
 		})
@@ -273,12 +295,16 @@ func TestChecker_HMAC_AESCBC(t *testing.T) {
 	iv := []byte("4kibazen4kibazen")
 
 	t.Parallel()
+
 	for _, tt := range tests {
 		t.Run(tt.id, func(t *testing.T) {
+			t.Parallel()
+			require := require.New(t)
+
 			s, err := NewHMACSigner(tt.id, tt.hmacName, []byte(tt.hmacName))
-			assert.Nil(t, err)
+			require.NoError(err)
 			c, err := NewAESCBCCipher(tt.id, []byte(tt.aesCbcKey))
-			assert.Nil(t, err)
+			require.NoError(err)
 			b := createBuilderForTest(tt.id).WithSigner(s).WithCipher(c).WithIVGenerator(ivGeneratorForTest(iv))
 			assertChecker(t, b, tt.id, tt.want)
 		})

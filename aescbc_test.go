@@ -6,7 +6,7 @@ import (
 	"encoding/base64"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestAESCBCCipher_NameKeySizeIVSize(t *testing.T) {
@@ -37,15 +37,19 @@ func TestAESCBCCipher_NameKeySizeIVSize(t *testing.T) {
 	}
 
 	t.Parallel()
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			require := require.New(t)
+
 			key := RandBytes(tt.keySize)
 			c, err := NewAESCBCCipher(tt.id, key)
-			assert.Nil(t, err)
-			assert.Equal(t, tt.id, c.ID())
-			assert.Equal(t, tt.name, c.Name())
-			assert.Equal(t, tt.keySize, c.KeySize())
-			assert.Equal(t, tt.ivSize, c.IVSize())
+			require.NoError(err)
+			require.Equal(tt.id, c.ID())
+			require.Equal(tt.name, c.Name())
+			require.Equal(tt.keySize, c.KeySize())
+			require.Equal(tt.ivSize, c.IVSize())
 		})
 	}
 }
@@ -107,24 +111,28 @@ func TestAesCBCCipher_EncryptDecrypt(t *testing.T) {
 	iv := []byte("4kibazen4kibazen")
 
 	t.Parallel()
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			require := require.New(t)
+
 			c, err := NewAESCBCCipher(tt.id, []byte(tt.key))
-			assert.Nil(t, err)
-			assert.Equal(t, tt.name, c.Name())
+			require.NoError(err)
+			require.Equal(tt.name, c.Name())
 
 			data := []byte(tt.data)
 
 			encryptedData, err := c.Encrypt(data, iv)
-			assert.Nil(t, err)
+			require.NoError(err)
 
 			encryptedDataB64 := base64.StdEncoding.EncodeToString(encryptedData)
-			assert.Equal(t, tt.want, encryptedDataB64)
+			require.Equal(tt.want, encryptedDataB64)
 
 			decryptedData, err := c.Decrypt(encryptedData, iv)
-			assert.Nil(t, err)
+			require.NoError(err)
 
-			assert.Equal(t, data, decryptedData)
+			require.Equal(data, decryptedData)
 		})
 	}
 }

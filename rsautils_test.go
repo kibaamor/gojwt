@@ -12,16 +12,16 @@ import (
 	"os"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
-func genRSAKeyBytes(isPrivate, isPKCS1, pemEncoded bool) (privateKey *rsa.PrivateKey, data []byte) {
-	var err error
-
-	privateKey, err = rsa.GenerateKey(rand.Reader, 1024)
+func genRSAKeyBytes(isPrivate, isPKCS1, pemEncoded bool) (*rsa.PrivateKey, []byte) {
+	privateKey, err := rsa.GenerateKey(rand.Reader, 1024)
 	if err != nil {
 		panic(err)
 	}
+
+	var data []byte
 
 	if isPrivate {
 		if isPKCS1 {
@@ -93,8 +93,12 @@ func TestParseRSAPrivateKeyFromBytesOrBase64(t *testing.T) {
 	}
 
 	t.Parallel()
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			require := require.New(t)
+
 			privateKey, data := genRSAKeyBytes(true, tt.isPKCS1, false)
 
 			var (
@@ -107,8 +111,8 @@ func TestParseRSAPrivateKeyFromBytesOrBase64(t *testing.T) {
 				parsedPrivateKey, err = ParseRSAPrivateKeyFromBytes(data)
 			}
 
-			assert.Nil(t, err)
-			assert.True(t, privateKey.Equal(parsedPrivateKey), "private key parsed failed")
+			require.NoError(err)
+			require.True(privateKey.Equal(parsedPrivateKey), "private key parsed failed")
 		})
 	}
 }
@@ -142,8 +146,12 @@ func TestParseRSAPublicKeyFromBytesOrBase64(t *testing.T) {
 	}
 
 	t.Parallel()
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			require := require.New(t)
+
 			privateKey, data := genRSAKeyBytes(false, tt.isPKCS1, false)
 			publicKey := &privateKey.PublicKey
 
@@ -157,8 +165,8 @@ func TestParseRSAPublicKeyFromBytesOrBase64(t *testing.T) {
 				parsedPublicKey, err = ParseRSAPublicKeyFromBytes(data)
 			}
 
-			assert.Nil(t, err)
-			assert.True(t, publicKey.Equal(parsedPublicKey), "public key parsed failed")
+			require.NoError(err)
+			require.True(publicKey.Equal(parsedPublicKey), "public key parsed failed")
 		})
 	}
 }
@@ -192,8 +200,12 @@ func TestParseRSAPrivateKeyFromPemBytesOrFile(t *testing.T) {
 	}
 
 	t.Parallel()
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			require := require.New(t)
+
 			privateKey, data := genRSAKeyBytes(true, tt.isPKCS1, true)
 
 			var (
@@ -203,15 +215,15 @@ func TestParseRSAPrivateKeyFromPemBytesOrFile(t *testing.T) {
 			if tt.isFile {
 				var filename string
 				filename, err = WriteToTempFile("", "rsa_test", data)
-				assert.Nil(t, err)
+				require.NoError(err)
 				parsedPrivateKey, err = ParseRSAPrivateKeyFromPemFile(filename)
 				_ = os.Remove(filename)
 			} else {
 				parsedPrivateKey, err = ParseRSAPrivateKeyFromPemBytes(data)
 			}
 
-			assert.Nil(t, err)
-			assert.True(t, privateKey.Equal(parsedPrivateKey), "private key parsed failed")
+			require.NoError(err)
+			require.True(privateKey.Equal(parsedPrivateKey), "private key parsed failed")
 		})
 	}
 }
@@ -245,8 +257,12 @@ func TestParseRSAPublicKeyFromPemBytesOrFile(t *testing.T) {
 	}
 
 	t.Parallel()
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			require := require.New(t)
+
 			privateKey, data := genRSAKeyBytes(false, tt.isPKCS1, true)
 			publicKey := &privateKey.PublicKey
 
@@ -257,15 +273,15 @@ func TestParseRSAPublicKeyFromPemBytesOrFile(t *testing.T) {
 			if tt.isFile {
 				var filename string
 				filename, err = WriteToTempFile("", "rsa_test", data)
-				assert.Nil(t, err)
+				require.NoError(err)
 				parsedPublicKey, err = ParseRSAPublicKeyFromPemFile(filename)
 				_ = os.Remove(filename)
 			} else {
 				parsedPublicKey, err = ParseRSAPublicKeyFromPemBytes(data)
 			}
 
-			assert.Nil(t, err)
-			assert.True(t, publicKey.Equal(parsedPublicKey), "public key parsed failed")
+			require.NoError(err)
+			require.True(publicKey.Equal(parsedPublicKey), "public key parsed failed")
 		})
 	}
 }

@@ -16,7 +16,7 @@ var (
 
 func ParseRSAPrivateKeyFromBytes(data []byte) (*rsa.PrivateKey, error) {
 	var (
-		parsedKey interface{}
+		parsedKey any
 		err       error
 	)
 
@@ -36,7 +36,7 @@ func ParseRSAPrivateKeyFromBytes(data []byte) (*rsa.PrivateKey, error) {
 
 func ParseRSAPublicKeyFromBytes(data []byte) (*rsa.PublicKey, error) {
 	var (
-		parsedKey interface{}
+		parsedKey any
 		err       error
 	)
 

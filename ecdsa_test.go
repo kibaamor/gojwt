@@ -8,7 +8,7 @@ import (
 	"crypto/rand"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestNewECDSASignerAndVerifier(t *testing.T) {
@@ -35,25 +35,29 @@ func TestNewECDSASignerAndVerifier(t *testing.T) {
 	}
 
 	t.Parallel()
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			require := require.New(t)
+
 			privateKey, err := ecdsa.GenerateKey(tt.curve, rand.Reader)
-			assert.Nil(t, err)
+			require.NoError(err)
 			publicKey := &privateKey.PublicKey
 
 			signer, err := NewECDSASigner(tt.id, tt.name, privateKey)
-			assert.Nil(t, err)
-			assert.Equal(t, tt.id, signer.ID())
-			assert.Equal(t, tt.name, signer.Name())
+			require.NoError(err)
+			require.Equal(tt.id, signer.ID())
+			require.Equal(tt.name, signer.Name())
 
 			verifier := signer.Verifier()
-			assert.Equal(t, tt.id, verifier.ID())
-			assert.Equal(t, tt.name, verifier.Name())
+			require.Equal(tt.id, verifier.ID())
+			require.Equal(tt.name, verifier.Name())
 
 			verifier, err = NewECDSAVerifier(tt.id, tt.name, publicKey)
-			assert.Nil(t, err)
-			assert.Equal(t, tt.id, verifier.ID())
-			assert.Equal(t, tt.name, verifier.Name())
+			require.NoError(err)
+			require.Equal(tt.id, verifier.ID())
+			require.Equal(tt.name, verifier.Name())
 		})
 	}
 }
@@ -86,24 +90,28 @@ func TestECDSASignerAndVerifier(t *testing.T) {
 	}
 
 	t.Parallel()
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			require := require.New(t)
+
 			signer, err := NewECDSASigner(tt.id, tt.name, tt.privateKey)
-			assert.Nil(t, err)
+			require.NoError(err)
 
 			data := []byte(tt.name)
 
 			sig, err := signer.Sign(data)
-			assert.Nil(t, err)
+			require.NoError(err)
 
 			verifier, err := NewECDSAVerifier(tt.id, tt.name, tt.publicKey)
-			assert.Nil(t, err)
+			require.NoError(err)
 			err = verifier.Verify(data, sig)
-			assert.Nil(t, err)
+			require.NoError(err)
 
 			verifier = signer.Verifier()
 			err = verifier.Verify(data, sig)
-			assert.Nil(t, err)
+			require.NoError(err)
 		})
 	}
 }

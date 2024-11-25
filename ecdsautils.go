@@ -16,7 +16,7 @@ var (
 
 func ParseECDSAPrivateKeyFromBytes(data []byte) (*ecdsa.PrivateKey, error) {
 	var (
-		parsedKey interface{}
+		parsedKey any
 		err       error
 	)
 
@@ -36,7 +36,7 @@ func ParseECDSAPrivateKeyFromBytes(data []byte) (*ecdsa.PrivateKey, error) {
 
 func ParseECDSAPublicKeyFromBytes(data []byte) (*ecdsa.PublicKey, error) {
 	var (
-		parsedKey interface{}
+		parsedKey any
 		err       error
 	)
 

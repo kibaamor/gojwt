@@ -5,7 +5,7 @@ package gojwt
 import (
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestPKCS7Padding(t *testing.T) {
@@ -54,14 +54,18 @@ func TestPKCS7Padding(t *testing.T) {
 	}
 
 	t.Parallel()
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			require := require.New(t)
+
 			got := PKCS7Padding(tt.input, tt.padding)
-			assert.Equal(t, tt.want, got)
+			require.Equal(tt.want, got)
 
 			output, err := PKCS7Unpadding(got)
-			assert.Nil(t, err)
-			assert.Equal(t, tt.input, output)
+			require.NoError(err)
+			require.Equal(tt.input, output)
 		})
 	}
 }
@@ -94,12 +98,14 @@ func TestPKCS7Unpadding(t *testing.T) {
 	}
 
 	t.Parallel()
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			require := require.New(t)
+
 			_, err := PKCS7Unpadding(tt.input)
-			if !assert.NotNil(t, err) {
-				assert.Equal(t, errPKCS7Padding, err)
-			}
+			require.Equal(errPKCS7Padding, err)
 		})
 	}
 }
@@ -130,14 +136,17 @@ func TestRandBytes(t *testing.T) {
 	t.Parallel()
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			require := require.New(t)
+
 			a := RandBytes(tt.input)
 			b := RandBytes(tt.input)
 
-			assert.Equal(t, tt.want, len(a))
-			assert.Equal(t, tt.want, len(b))
+			require.Len(a, tt.want)
+			require.Len(b, tt.want)
 
 			if tt.want > 0 {
-				assert.NotEqual(t, a, b)
+				require.NotEqual(a, b)
 			}
 		})
 	}
